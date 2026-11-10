@@ -239,6 +239,10 @@ class QuizGame:
             return True
         try:
             write_state_file(self.state_path, self.to_state())
+        except KeyboardInterrupt:
+            # 종료 직전 저장을 다시 Ctrl+C로 중단해도 추적 메시지로 끝내지 않는다.
+            print("\n저장 도중 중단되었습니다. 저장 완료를 보장할 수 없습니다.")
+            return False
         except (OSError, ValueError) as error:
             print(f"저장 실패: {error}. 변경은 메모리에만 있으며 원본을 유지합니다.")
             return False
