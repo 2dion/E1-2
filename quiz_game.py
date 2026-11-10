@@ -35,8 +35,8 @@ class QuizGame:
                 self.add_quiz()
             elif choice == 3:
                 self.list_quizzes()
-            else:
-                print("이 기능은 다음 개발 단계에서 연결합니다.")
+            elif choice == 4:
+                self.show_score()
 
     def play(self) -> None:
         """모든 문제를 한 번씩 출제하고 Quiz에게 정답 여부를 묻는다."""
@@ -54,8 +54,7 @@ class QuizGame:
             else:
                 print(f"오답입니다. 정답은 {quiz.answer}번입니다.")
         score = correct_count * 2
-        self.best_score = max(self.best_score, score)
-        self.has_played = True
+        self.update_best_score(score)
         print(f"결과: {correct_count}/{len(self.quizzes)}개 정답, {score}점")
 
     def add_quiz(self) -> None:
@@ -77,3 +76,15 @@ class QuizGame:
         print(f"\n=== 퀴즈 목록 ({len(self.quizzes)}개) ===")
         for number, quiz in enumerate(self.quizzes, start=1):
             print(f"{number}. {quiz.question}")
+
+    def update_best_score(self, score: int) -> None:
+        """기존 기록보다 낮은 점수로 최고 점수를 덮어쓰지 않는다."""
+        self.best_score = max(self.best_score, score)
+        self.has_played = True
+
+    def show_score(self) -> None:
+        """0점으로 끝낸 경우와 아직 한 판도 끝내지 않은 경우를 구분한다."""
+        if not self.has_played:
+            print("아직 완료한 퀴즈 풀이가 없습니다.")
+            return
+        print(f"최고 점수: {self.best_score}점 (정답 1개당 2점)")
