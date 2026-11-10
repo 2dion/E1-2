@@ -1,0 +1,22 @@
+E1-2 개발 환경 실제 확인
+2026-11-10 18:38:49 KST
+
+$ python3 --version
+Python 3.13.12
+
+$ git --version
+git version 2.54.0 (Apple Git-157)
+
+$ git config --get user.name
+2dion
+
+$ git config --get user.email
+[개인정보 보호를 위해 이메일 출력 생략]
+
+$ git rev-parse --show-toplevel
+/Users/leedongin/Documents/Codyssey/AllInOne/temp/E1-2
+
+$ git branch --show-current
+main
+
+Python 3.10 문법 호환은 AST 검사이며 실행 버전은 위 버전임

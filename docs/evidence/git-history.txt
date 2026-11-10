@@ -1,0 +1,32 @@
+E1-2 Git 실습: 실제 실행 결과
+
+$ git init
+Reinitialized existing Git repository in /Users/leedongin/Documents/Codyssey/AllInOne/temp/E1-2/.git/
+
+기존 저장소 재초기화이며 원격/이력을 새로 만들지 않음
+
+$ git log --oneline --graph --all
+* 4be7486 Fix: 저장 중 중단 처리 보강과 실제 CLI 재현 도구 및 초기 상태 추가
+* 7257dd4 Feat: UTF-8 JSON 원자적 저장과 손상 백업 및 안전 종료 구현
+* 881a22a Feat: 랜덤 출제와 문제 수 선택 및 힌트 삭제 히스토리 구현
+* fde9a9c Feat: 최고 점수 갱신과 미플레이 및 0점 상태 구분 구현
+* 88b0eb5 Feat: 퀴즈 목록 조회와 빈 목록 안내 구현
+* 249c779 Feat: 퀴즈 등록과 빈 내용 및 정답 범위 입력 검증 구현
+*   22018aa Merge: 별도 브랜치의 퀴즈 플레이 기능 병합
+|\  
+| * 69728a3 Feat: QuizGame 퀴즈 출제와 정답 판정 및 결과 표시 구현
+|/  
+* 1af7a7a Feat: Python 개발 기초 기본 퀴즈 8개 추가
+* d70ae7c Feat: Quiz 책임과 유효성 검사 및 단위 테스트 구현
+* 315c1b1 Feat: 메뉴와 공통 입력 검증 및 안전 종료 구현
+* 3460531 Docs: 사전 질문과 미션 개발 계획 정리
+* 4f0d26a Initial commit
+
+$ git rev-list --count HEAD
+13
+
+$ git branch -a
+  feature/quiz-play
+* main
+  remotes/origin/HEAD -> origin/main
+  remotes/origin/main
