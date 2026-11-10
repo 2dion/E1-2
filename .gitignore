@@ -185,3 +185,6 @@ cython_debug/
 *.bak
 .state.json.*.tmp
 .sandbox/
+
+# Local GitHub CLI and its private authentication configuration
+.tools/
