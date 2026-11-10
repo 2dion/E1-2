@@ -3,7 +3,8 @@
 from pathlib import Path
 
 from defaults import create_default_quizzes
-from input_utils import read_int
+from input_utils import read_int, read_text
+from quiz import Quiz
 
 
 class QuizGame:
@@ -30,6 +31,8 @@ class QuizGame:
                 return
             if choice == 1:
                 self.play()
+            elif choice == 2:
+                self.add_quiz()
             else:
                 print("이 기능은 다음 개발 단계에서 연결합니다.")
 
@@ -52,3 +55,14 @@ class QuizGame:
         self.best_score = max(self.best_score, score)
         self.has_played = True
         print(f"결과: {correct_count}/{len(self.quizzes)}개 정답, {score}점")
+
+    def add_quiz(self) -> None:
+        """모든 항목을 받은 뒤 등록해, 입력 중단으로 미완성 문제가 남지 않게 한다."""
+        question = read_text("문제: ")
+        choices = [read_text(f"선택지 {number}: ") for number in range(1, 5)]
+        answer = read_int("정답 번호 (1~4): ", 1, 4)
+        hint = input("힌트 (없으면 Enter): ").strip()
+        # 모든 입력을 마친 뒤에만 목록에 반영한다.
+        quiz = Quiz(question, choices, answer, hint)
+        self.quizzes.append(quiz)
+        print(f"퀴즈를 추가했습니다. 현재 {len(self.quizzes)}개입니다.")
