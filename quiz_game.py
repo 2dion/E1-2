@@ -3,10 +3,13 @@
 from datetime import datetime
 from pathlib import Path
 import random
+import json
+import shutil
 
 from defaults import create_default_quizzes
 from input_utils import read_int, read_text
 from quiz import Quiz
+from state_io import load_state as read_state_file, save_state as write_state_file
 
 
 class QuizGame:
@@ -22,6 +25,8 @@ class QuizGame:
         self.dirty = False
         # 기본 실행은 매번 다른 시드, 테스트는 Random(고정값)을 주입해 재현한다.
         self.rng = rng if rng is not None else random.Random()
+        self.write_allowed = True
+        self.load_state()
 
     def show_menu(self) -> None:
         print("\n=== Python·개발 기초 퀴즈 ===")
@@ -116,6 +121,7 @@ class QuizGame:
         status = "완료" if completed else "중단 (최고 점수 반영 안 함)"
         print(f"결과 [{status}]: {session['correct_count']}/{session['answered_count']}개 정답, "
               f"힌트 {session['hints_used']}회, {score}점")
+        self.save_state()
 
     def add_quiz(self) -> None:
         """모든 항목을 받은 뒤 등록해, 입력 중단으로 미완성 문제가 남지 않게 한다."""
@@ -128,6 +134,7 @@ class QuizGame:
         self.quizzes.append(quiz)
         self.dirty = True
         print(f"퀴즈를 추가했습니다. 현재 {len(self.quizzes)}개입니다.")
+        self.save_state()
 
     def list_quizzes(self) -> None:
         """등록 번호와 문제 내용을 보여 준다. 정답은 목록에서 공개하지 않는다."""
@@ -168,6 +175,7 @@ class QuizGame:
         self.quizzes.pop(number - 1)
         self.dirty = True
         print("퀴즈를 삭제했습니다.")
+        self.save_state()
 
     def show_history(self) -> None:
         """날짜·시각·풀이 수·점수·중단 여부를 저장된 순서로 보여 준다."""
@@ -181,3 +189,59 @@ class QuizGame:
                   f"{record['answered_count']}/{record['question_count']}문제 풀이 | "
                   f"정답 {record['correct_count']}개 | 힌트 {record['hints_used']}회 | "
                   f"{record['score']}점")
+
+    def to_state(self) -> dict:
+        """Quiz 객체를 JSON이 저장할 수 있는 딕셔너리·리스트로 바꾼다."""
+        return {"schema_version": 1,
+                "quizzes": [quiz.to_dict() for quiz in self.quizzes],
+                "best_score": self.best_score, "has_played": self.has_played,
+                "history": self.history}
+
+    def load_state(self) -> None:
+        """전체 검증에 성공한 데이터만 반영한다. 오류면 기본 퀴즈로 실행한다."""
+        try:
+            state = read_state_file(self.state_path)
+        except FileNotFoundError:
+            self.dirty = True
+            print("데이터 파일이 없어 기본 퀴즈 8개로 시작합니다.")
+        except (UnicodeDecodeError, json.JSONDecodeError, ValueError) as error:
+            print(f"데이터 파일 손상을 확인했습니다: {error}")
+            # 읽을 수 있었던 원본은 백업 성공 후에만 기본 데이터로 덮어쓸 수 있다.
+            stamp = datetime.now().strftime("%Y%m%d-%H%M%S-%f")
+            backup = self.state_path.with_name(f"{self.state_path.name}.corrupt-{stamp}.bak")
+            try:
+                shutil.copy2(self.state_path, backup)
+            except OSError as backup_error:
+                self.write_allowed = False
+                print(f"원본 백업 실패: {backup_error}. 원본 보호를 위해 저장을 막습니다.")
+            else:
+                self.dirty = True
+                print(f"손상 원본을 {backup.name}에 백업했습니다.")
+            print("기본 퀴즈 데이터로 복구해 실행합니다.")
+        except OSError as error:
+            # 권한 오류는 손상으로 단정하지 않고, 읽지 못한 원본을 보호한다.
+            self.write_allowed = False
+            print(f"데이터 파일을 읽을 수 없습니다: {error}")
+            print("기본 퀴즈로 실행하지만 원본 보호를 위해 저장하지 않습니다.")
+        else:
+            self.quizzes = [Quiz.from_dict(item) for item in state["quizzes"]]
+            self.best_score = state["best_score"]
+            self.has_played = state["has_played"]
+            self.history = state["history"]
+            self.dirty = False
+
+    def save_state(self) -> bool:
+        """변경이 있으면 원자적으로 저장하고 성공 여부를 정직하게 알린다."""
+        if not self.write_allowed:
+            print("저장하지 않았습니다. 읽기/백업 오류로 원본 보호 중이며 변경은 메모리에만 있습니다.")
+            return False
+        if not self.dirty:
+            return True
+        try:
+            write_state_file(self.state_path, self.to_state())
+        except (OSError, ValueError) as error:
+            print(f"저장 실패: {error}. 변경은 메모리에만 있으며 원본을 유지합니다.")
+            return False
+        self.dirty = False
+        print("state.json 저장 완료")
+        return True
