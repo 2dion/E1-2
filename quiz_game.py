@@ -33,6 +33,8 @@ class QuizGame:
                 self.play()
             elif choice == 2:
                 self.add_quiz()
+            elif choice == 3:
+                self.list_quizzes()
             else:
                 print("이 기능은 다음 개발 단계에서 연결합니다.")
 
@@ -66,3 +68,12 @@ class QuizGame:
         quiz = Quiz(question, choices, answer, hint)
         self.quizzes.append(quiz)
         print(f"퀴즈를 추가했습니다. 현재 {len(self.quizzes)}개입니다.")
+
+    def list_quizzes(self) -> None:
+        """등록 번호와 문제 내용을 보여 준다. 정답은 목록에서 공개하지 않는다."""
+        if not self.quizzes:
+            print("등록된 퀴즈가 없습니다.")
+            return
+        print(f"\n=== 퀴즈 목록 ({len(self.quizzes)}개) ===")
+        for number, quiz in enumerate(self.quizzes, start=1):
+            print(f"{number}. {quiz.question}")
