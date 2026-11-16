@@ -36,6 +36,10 @@ if [ -e "$CLONE" ]; then
     exit 1
 fi
 
+# GitHub에서 병합한 PR 등 원격에 먼저 올라간 커밋을 받아 둔다. 뒤처진 채 push하면 거부된다.
+printf '\n$ git pull --ff-only origin main (시작 전 동기화)\n'
+git_auth pull --ff-only origin main
+
 author_name="$(git config user.name)"
 author_email="$(git config user.email)"
 printf '\n$ git push origin main feature/quiz-play\n'
