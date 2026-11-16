@@ -8,6 +8,7 @@
 ## 목차
 
 - [평가 항목별 해결 정리](#evaluation)
+  - [제출 스크린샷](#screenshots)
 - [프로젝트 개요와 주제](#overview)
 - [실행과 메뉴](#run)
 - [구현 기능과 점수 규칙](#features)
@@ -45,7 +46,7 @@ git log --oneline --graph --all             # 커밋·브랜치·병합 기록
 | 재실행 후 추가 퀴즈·최고 점수 유지 | 추가·점수 갱신 직후 `state.json`에 UTF-8로 저장하고, 시작할 때 `load_state()`로 복원. 복원에 성공하면 첫 화면에 "저장된 데이터를 불러왔습니다. (퀴즈 N개, 최고 점수 M점)"을 출력 | [restart](docs/evidence/restart.txt): 별도 프로세스에서 퀴즈 9개, 최고 5점 확인 |
 | 기본 퀴즈 5개 이상 | `defaults.py`에 Python·개발 기초 문제 8개, 각각 선택지 4개·정답·힌트 | `defaults.py`, `state.json` |
 | GitHub 업로드, 의미 있는 커밋 10개 이상 | 기능 단위 커밋 16개(이 보강 이전 기준, 빈 커밋 없음). 2026-11-16 실습 스크립트가 `main`과 `feature/quiz-play`를 모두 원격에 push했고, 실습 후 원격 `main`이 로컬과 같은 `4b00698`임을 `git ls-remote`로 확인 | [git-history](docs/evidence/git-history.txt), GitHub 커밋 목록 |
-| 브랜치 생성·병합이 `git log --oneline --graph`에 보임 | `feature/quiz-play`에서 퀴즈 풀기를 구현하고 `--no-ff`로 병합해 병합 커밋 `22018aa`를 남김 | [git-history](docs/evidence/git-history.txt), [그래프 캡처](docs/screenshots/git-history.png) |
+| 브랜치 생성·병합이 `git log --oneline --graph`에 보임 | `feature/quiz-play`에서 퀴즈 풀기를 구현하고 `--no-ff`로 병합해 병합 커밋 `22018aa`를 남김 | [git-history](docs/evidence/git-history.txt), [그래프 캡처](#screenshots) |
 | clone과 pull 실습 흔적 | 별도 폴더에 clone → README 한 줄 추가 → commit → push → 원본 폴더에서 `git pull --ff-only` → 로컬·원격 main 해시 일치 확인을 `tools/publish_and_practice.sh`로 실제 실행 | [git-remote-practice](docs/evidence/git-remote-practice.txt), 복제본 커밋 `4b00698` |
 
 ### 항목 2. 코드 구조 및 설계
@@ -125,6 +126,35 @@ git log --oneline --graph --all             # 커밋·브랜치·병합 기록
 | --- | --- | --- | --- |
 | 종료 직전 저장 중에 Ctrl+C를 다시 누르면 Traceback으로 끝남 | `main()`의 `finally`에서 부르는 `save_state()` 안에서 난 `KeyboardInterrupt`는 바깥 `except`가 이미 지나가서 잡히지 않는다 | `KeyboardInterrupt`는 `Exception`의 하위가 아니라 `except (OSError, ValueError)`에 걸리지 않음을 확인 | `save_state()`에서 `KeyboardInterrupt`를 따로 잡아 "저장 완료를 보장할 수 없음"을 알리고 `False`를 반환 (커밋 `4be7486`), 저장 중 중단 테스트 추가 |
 | 처음 `git push`가 실패함 | 코드나 원격 주소가 아니라 HTTPS 인증 정보가 없다 | `git remote -v`의 원격 주소는 맞았고, 작업 환경에 GitHub 인증 정보가 없었음 | GitHub CLI로 로그인한 뒤 그 명령에만 gh 인증을 쓰도록 `tools/publish_and_practice.sh` 작성. 토큰은 출력하거나 파일에 쓰지 않음 |
+
+<a id="screenshots"></a>
+### 제출 스크린샷 (macOS 실제 화면, 2026-11-16)
+
+미션 제출물로 요구한 화면이다. 게임은 임시 복사본에서 실행해 프로젝트 `state.json`은 바뀌지 않았다. 촬영 방식은 [7. 캡처의 성격](#verification)에 있고, 메뉴·재시작·입력 오류 등 추가 화면도 7절에 있다.
+
+#### 개발 환경 (VSCode, Python 버전, Git 설정)
+
+![VSCode에서 프로젝트를 연 창과 python3·git 버전, user.name, 현재 브랜치를 확인한 Terminal](docs/screenshots/environment.png)
+
+#### 퀴즈 추가
+
+![문제, 선택지 4개, 정답 번호, 힌트를 입력해 퀴즈를 추가한 화면](docs/screenshots/add-quiz.png)
+
+#### 퀴즈 목록
+
+![등록된 퀴즈 9개 목록](docs/screenshots/list.png)
+
+#### 퀴즈 풀기 (문제 수 선택, 힌트, 정답/오답, 결과)
+
+![3문제를 골라 힌트를 쓰고 정답·오답 안내와 결과를 받은 화면](docs/screenshots/play.png)
+
+#### 점수 확인
+
+![최고 점수 확인 화면](docs/screenshots/score.png)
+
+#### `git log --oneline --graph --all`
+
+![브랜치 생성·병합과 clone/pull 실습 커밋이 보이는 Git 그래프](docs/screenshots/git-history.png)
 
 <a id="overview"></a>
 ## 1. 프로젝트 개요와 주제
@@ -347,15 +377,39 @@ python3 tools/capture_evidence.py
 
 증거 재현에서만 원본 퀴즈의 정답 선택지를 2번 위치로 옮긴 **임시 테스트 데이터**를 사용해, 랜덤 순서와 무관하게 3개 정답·힌트 1회·5점을 검증한다. 원래 기본 문제의 내용·정답 의미와 프로젝트 `state.json`은 바꾸지 않는다. 로그 재생성 명령은 PNG를 자동 재촬영하지 않는다. macOS 실제 화면 캡처의 플레이는 이 재배치 없이 기본 문제 그대로 진행했다(3문제 중 2개 정답, 힌트 1회, 3점, 오답 안내 포함).
 
-- [환경](docs/screenshots/environment.png) · [메뉴](docs/screenshots/menu.png)
-- [추가](docs/screenshots/add-quiz.png) · [목록](docs/screenshots/list.png)
-- [플레이·힌트](docs/screenshots/play.png) · [최고 점수](docs/screenshots/score.png)
-- [히스토리](docs/screenshots/history.png) · [재시작 유지](docs/screenshots/restart.png)
-- [삭제](docs/screenshots/delete.png) · [입력 오류](docs/screenshots/invalid-input.png)
-- [EOF](docs/screenshots/eof.png) · [Ctrl+C](docs/screenshots/ctrl-c.png)
-- [손상 복구](docs/screenshots/corrupt-recovery.png) · [Git 그래프](docs/screenshots/git-history.png)
+아래는 미션 제출물 외의 추가 캡처다. 미션이 요구한 개발 환경·추가·목록·플레이·점수·Git 그래프 화면은 [0. 평가 항목별 해결 정리](#screenshots)에 바로 보이게 넣었다.
 
-![실제 퀴즈 플레이와 힌트 차감 결과](docs/screenshots/play.png)
+#### 메뉴와 불러오기 안내 (실제 화면)
+
+![프로그램 시작 시 저장된 데이터를 불러왔다는 안내와 메뉴](docs/screenshots/menu.png)
+
+#### 재시작 후 데이터 유지 (실제 화면)
+
+![종료 후 다시 실행하자 퀴즈 9개와 최고 점수 3점을 불러온 화면](docs/screenshots/restart.png)
+
+#### 입력 오류 처리 (실제 화면)
+
+![메뉴에서 빈 입력, abc, 9를 입력했을 때의 안내](docs/screenshots/invalid-input.png)
+
+#### 점수 히스토리 (실행 로그 캡처)
+
+![완료·중단 판의 날짜와 점수 기록](docs/screenshots/history.png)
+
+#### 퀴즈 삭제 (실행 로그 캡처)
+
+![번호 선택 후 확인을 거쳐 퀴즈를 삭제한 화면](docs/screenshots/delete.png)
+
+#### EOF 안전 종료 (실행 로그 캡처)
+
+![입력 스트림이 끝났을 때 안내 후 저장하고 종료한 화면](docs/screenshots/eof.png)
+
+#### Ctrl+C 안전 종료 (실행 로그 캡처)
+
+![실제 SIGINT를 받았을 때 안내 후 저장하고 종료한 화면](docs/screenshots/ctrl-c.png)
+
+#### 손상 파일 복구 (실행 로그 캡처)
+
+![잘린 JSON을 감지해 원본을 백업하고 기본 퀴즈로 복구한 화면](docs/screenshots/corrupt-recovery.png)
 
 <a id="git-workflow"></a>
 ## 8. Git 기록과 실습
