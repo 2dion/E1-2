@@ -7,6 +7,7 @@ from datetime import datetime
 from pathlib import Path
 
 from quiz import Quiz
+from scoring import calculate_score
 
 
 def _integer(value: object, name: str, minimum: int, maximum=None) -> int:
@@ -44,7 +45,7 @@ def _history_record(record: dict) -> dict:
     correct = _integer(record["correct_count"], "correct_count", 0, answered)
     hints = _integer(record["hints_used"], "hints_used", 0, questions)
     score = _integer(record["score"], "score", 0)
-    if score != max(0, correct * 2 - hints):
+    if score != calculate_score(correct, hints):
         raise ValueError("score가 정답 수와 힌트 수로 계산한 점수와 다릅니다.")
     completed = record["completed"]
     if type(completed) is not bool:

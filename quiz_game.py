@@ -8,7 +8,8 @@ import shutil
 
 from defaults import create_default_quizzes
 from input_utils import read_int, read_text
-from quiz import Quiz
+from quiz import CHOICE_COUNT, Quiz
+from scoring import HINT_PENALTY, POINTS_PER_CORRECT, calculate_score
 from state_io import load_state as read_state_file, save_state as write_state_file
 
 
@@ -63,7 +64,7 @@ class QuizGame:
         selected_quizzes = self.rng.sample(self.quizzes, k=count)
         session = {"question_count": count, "answered_count": 0,
                    "correct_count": 0, "hints_used": 0}
-        print("정답 +2점, 힌트 사용 -1점. 최종 점수는 0점 미만이 되지 않습니다.")
+        print(f"정답 +{POINTS_PER_CORRECT}점, 힌트 사용 -{HINT_PENALTY}점. 최종 점수는 0점 미만이 되지 않습니다.")
         try:
             for number, quiz in enumerate(selected_quizzes, start=1):
                 print(f"\n[문제 {number}/{count}]")
@@ -73,7 +74,7 @@ class QuizGame:
                 # 게임은 퀴즈의 정답 판정 방법을 복제하지 않고 요청만 한다.
                 if quiz.is_correct(selected):
                     session['correct_count'] += 1
-                    print("정답입니다! (+2점)")
+                    print(f"정답입니다! (+{POINTS_PER_CORRECT}점)")
                 else:
                     print(f"오답입니다. 정답은 {quiz.answer}번입니다.")
         except (EOFError, KeyboardInterrupt):
@@ -83,10 +84,10 @@ class QuizGame:
             self.finish_session(session, completed=True)
 
     def ask_answer(self, quiz: Quiz, session: dict) -> int:
-        """힌트는 한 문제에서 한 번만 차감하고, 정답 번호는 1~4만 받는다."""
+        """힌트는 한 문제에서 한 번만 차감하고, 정답 번호는 1~선택지 수만 받는다."""
         hint_shown = False
         while True:
-            text = input("정답 번호 (1~4, 힌트 h): ").strip()
+            text = input(f"정답 번호 (1~{CHOICE_COUNT}, 힌트 h): ").strip()
             if text.lower() == "h":
                 if not quiz.hint:
                     print("이 문제에는 힌트가 없습니다. 점수는 차감되지 않습니다.")
@@ -95,7 +96,7 @@ class QuizGame:
                 else:
                     hint_shown = True
                     session['hints_used'] += 1
-                    print(f"힌트 (-1점): {quiz.hint}")
+                    print(f"힌트 (-{HINT_PENALTY}점): {quiz.hint}")
                 continue
             if not text:
                 print("입력이 비어 있습니다. 번호를 입력해 주세요.")
@@ -103,15 +104,15 @@ class QuizGame:
             try:
                 number = int(text)
             except ValueError:
-                print("1~4의 숫자 또는 힌트 h를 입력해 주세요.")
+                print(f"1~{CHOICE_COUNT}의 숫자 또는 힌트 h를 입력해 주세요.")
                 continue
-            if 1 <= number <= 4:
+            if 1 <= number <= CHOICE_COUNT:
                 return number
-            print("1~4 범위의 번호를 입력해 주세요.")
+            print(f"1~{CHOICE_COUNT} 범위의 번호를 입력해 주세요.")
 
     def finish_session(self, session: dict, completed: bool) -> None:
         """게임 기록을 확정하고, 완료한 판만 최고 점수와 비교한다."""
-        score = max(0, session['correct_count'] * 2 - session['hints_used'])
+        score = calculate_score(session['correct_count'], session['hints_used'])
         record = {**session, "score": score, "completed": completed,
                   "played_at": datetime.now().astimezone().isoformat(timespec="seconds")}
         self.history.append(record)
@@ -126,8 +127,8 @@ class QuizGame:
     def add_quiz(self) -> None:
         """모든 항목을 받은 뒤 등록해, 입력 중단으로 미완성 문제가 남지 않게 한다."""
         question = read_text("문제: ")
-        choices = [read_text(f"선택지 {number}: ") for number in range(1, 5)]
-        answer = read_int("정답 번호 (1~4): ", 1, 4)
+        choices = [read_text(f"선택지 {number}: ") for number in range(1, CHOICE_COUNT + 1)]
+        answer = read_int(f"정답 번호 (1~{CHOICE_COUNT}): ", 1, CHOICE_COUNT)
         hint = input("힌트 (없으면 Enter): ").strip()
         # 모든 입력을 마친 뒤에만 목록에 반영한다.
         quiz = Quiz(question, choices, answer, hint)
@@ -155,7 +156,7 @@ class QuizGame:
         if not self.has_played:
             print("아직 완료한 퀴즈 풀이가 없습니다.")
             return
-        print(f"최고 점수: {self.best_score}점 (완료한 판의 총점, 정답 +2 / 힌트 -1)")
+        print(f"최고 점수: {self.best_score}점 (완료한 판의 총점, 정답 +{POINTS_PER_CORRECT} / 힌트 -{HINT_PENALTY})")
 
     def delete_quiz(self) -> None:
         """번호와 확인을 받은 뒤 삭제한다. 취소하면 상태를 바꾸지 않는다."""
