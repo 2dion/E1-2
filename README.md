@@ -1,7 +1,7 @@
 # E1-2 · Python·개발 기초 퀴즈
 
 > Codyssey 입학 연수: 컴퓨터에게 명령 내리는 말(파이썬) 처음 배우기
-> 현재: **필수 기능·보너스 5개 구현 및 검증 완료, 코드 GitHub 업로드 완료. clone/pull 실습은 진행 예정.**
+> 현재: **필수 기능·보너스 5개 구현 및 검증 완료, 코드 GitHub 업로드 완료. clone/pull 실습 완료.**
 > 평가자는 [0. 평가 항목별 해결 정리](#evaluation)부터 보면 항목 1~5의 해결 방법과 증거를 바로 확인할 수 있다.
 > 코드와 설명은 AI 도움으로 작성·검증했다. 테스트 통과가 학습자가 내용을 스스로 설명했다는 뜻은 아니므로, 아래 과제 목표를 직접 확인한다.
 
@@ -44,9 +44,9 @@ git log --oneline --graph --all             # 커밋·브랜치·병합 기록
 | 입력 오류 4가지: 공백, 문자, 범위 밖, 빈 입력 | `input_utils.read_int()`가 ① `strip()`으로 공백 제거 → ② 빈 값 안내 → ③ `int()` 실패(ValueError) 안내 → ④ 범위 검사 순서로 처리하고 다시 입력받음. 정답 입력(`ask_answer`)도 같은 순서 | [invalid-input](docs/evidence/invalid-input.txt) (입력 `\n`, `abc`, `9`, ` 0 `), `tests/test_input_utils.py` |
 | 재실행 후 추가 퀴즈·최고 점수 유지 | 추가·점수 갱신 직후 `state.json`에 UTF-8로 저장하고, 시작할 때 `load_state()`로 복원 | [restart](docs/evidence/restart.txt): 별도 프로세스에서 퀴즈 9개, 최고 5점 확인 |
 | 기본 퀴즈 5개 이상 | `defaults.py`에 Python·개발 기초 문제 8개, 각각 선택지 4개·정답·힌트 | `defaults.py`, `state.json` |
-| GitHub 업로드, 의미 있는 커밋 10개 이상 | 기능 단위 커밋 16개(이 보강 이전 기준, 빈 커밋 없음). 원격 `main`이 로컬과 같은 `0b19634`임을 2026-11-16 `git ls-remote`로 확인 | [git-history](docs/evidence/git-history.txt), GitHub 커밋 목록 |
+| GitHub 업로드, 의미 있는 커밋 10개 이상 | 기능 단위 커밋 16개(이 보강 이전 기준, 빈 커밋 없음). 2026-11-16 실습 스크립트가 `main`과 `feature/quiz-play`를 모두 원격에 push했고, 실습 후 원격 `main`이 로컬과 같은 `4b00698`임을 `git ls-remote`로 확인 | [git-history](docs/evidence/git-history.txt), GitHub 커밋 목록 |
 | 브랜치 생성·병합이 `git log --oneline --graph`에 보임 | `feature/quiz-play`에서 퀴즈 풀기를 구현하고 `--no-ff`로 병합해 병합 커밋 `22018aa`를 남김 | [git-history](docs/evidence/git-history.txt), [그래프 캡처](docs/screenshots/git-history.png) |
-| clone과 pull 실습 흔적 | **진행 예정.** `tools/publish_and_practice.sh`가 별도 폴더에 clone → README 한 줄 추가 → commit → push → 원본 폴더에서 `pull --ff-only` → 해시 비교를 실제로 실행하고 출력 전체를 `docs/evidence/git-remote-practice.txt`에 남긴다 | 실행 후 [8. Git 기록과 실습](#git-workflow)에 결과 추가 |
+| clone과 pull 실습 흔적 | 별도 폴더에 clone → README 한 줄 추가 → commit → push → 원본 폴더에서 `git pull --ff-only` → 로컬·원격 main 해시 일치 확인을 `tools/publish_and_practice.sh`로 실제 실행 | [git-remote-practice](docs/evidence/git-remote-practice.txt), 복제본 커밋 `4b00698` |
 
 ### 항목 2. 코드 구조 및 설계
 
@@ -357,7 +357,7 @@ python3 tools/capture_evidence.py
 <a id="git-workflow"></a>
 ## 8. Git 기록과 실습
 
-로컬은 **최소 10개의 의미 있는 커밋** 조건을 충족한다. `main`은 GitHub에 업로드했고 2026-11-16 기준 원격 해시가 로컬과 같다. `feature/quiz-play` 브랜치는 아직 원격에 올리지 않았지만 병합 기록은 main 그래프에 남아 있다. 정확한 최신 수와 원격 차이는 `git rev-list --count HEAD`, `git status --short --branch`로 확인한다. Git 그래프 이미지는 캡처 시점의 기록이며, 캡처 파일 자체를 저장하는 후속 커밋은 이미지에 포함되지 않을 수 있다.
+로컬은 **최소 10개의 의미 있는 커밋** 조건을 충족한다. `main`과 `feature/quiz-play`를 모두 GitHub에 업로드했고, 2026-11-16 clone/pull 실습 후 원격 `main` 해시가 로컬과 같은 `4b00698`이다. 병합 기록은 main 그래프에도 남아 있다. 정확한 최신 수와 원격 차이는 `git rev-list --count HEAD`, `git status --short --branch`로 확인한다. Git 그래프 이미지는 캡처 시점의 기록이며, 캡처 파일 자체를 저장하는 후속 커밋은 이미지에 포함되지 않을 수 있다.
 
 - `main`: 필수·보너스 기능과 저장·복구 통합.
 - `feature/quiz-play`: 플레이 기능 구현 후 main에 병합. 추적 가능한 실습 기록으로 남김.
@@ -373,14 +373,14 @@ git log --oneline --graph --all
 
 위는 실제 수행한 흐름의 요약이다. 기능별 커밋은 메뉴, Quiz, 기본 데이터, 플레이, 추가, 목록, 점수, 보너스, 파일 저장, 안전 종료 등으로 나누었다. 빈 커밋으로 개수를 채우지 않았다. [실제 Git 로그](docs/evidence/git-history.txt)
 
-**main 업로드는 완료, clone/pull 실습은 진행 예정:** 처음 HTTPS push는 작업 환경의 인증 부재로 실패했고, 이후 main을 업로드했다. 남은 실습은 로그인된 Mac 터미널에서 `bash tools/publish_and_practice.sh` 한 번으로 아래 순서를 실제 실행하고 출력 전체를 `docs/evidence/git-remote-practice.txt`에 남긴다. 아직 실행하지 않은 명령을 완료 기록으로 보지 않는다.
+**clone/pull 실습 완료 (2026-11-16 13:28 KST):** 처음 HTTPS push는 작업 환경의 인증 부재로 실패했고, 이후 로그인된 Mac 터미널에서 `bash tools/publish_and_practice.sh`로 아래 순서를 실제 실행했다. 출력 전체는 [git-remote-practice](docs/evidence/git-remote-practice.txt)에 있다.
 
-1. 원격에서 먼저 병합된 커밋을 `git pull --ff-only`로 받아 동기화.
-2. 원본 저장소의 main과 플레이 브랜치를 push하고 원격 해시 확인.
-3. 별도 폴더에 실제 원격 저장소를 clone.
-4. 복제 폴더에서 README에 유용한 한 줄 추가 → commit → push.
-5. 원본 폴더에서 `git pull --ff-only` 후 해당 줄과 커밋 확인.
-6. 실제 명령·성공 출력·최종 그래프를 증거에 추가. 생성된 로그 파일을 commit·push하고 이 절과 [항목 1 표](#evaluation)의 "진행 예정"을 결과로 바꾼다.
+1. 시작 전 `git pull --ff-only origin main`으로 동기화(이미 최신, `e221126`).
+2. `git push origin main feature/quiz-play`로 `feature/quiz-play`를 새 원격 브랜치로 올리고, 로컬·원격 main 일치(`e221126`) 확인.
+3. 별도 폴더에 `https://github.com/2dion/E1-2.git`을 clone.
+4. 복제 폴더에서 README에 "복제·동기화 실습 확인" 안내 추가 → commit `4b00698` → push(`e221126..4b00698`).
+5. 원본 폴더에서 `git pull --ff-only origin main`으로 fast-forward(`e221126..4b00698`) 후 `grep`으로 해당 줄 확인.
+6. 최종 로컬·원격 main 해시가 `4b006989b88208706f245fef11ac2105af15aa3a`로 일치했고, 로그 마지막 줄 `E1-2_REMOTE_PRACTICE_SUCCESS`를 확인.
 
 <a id="submission"></a>
 ## 9. 미션 조건 및 제출 현황
@@ -396,7 +396,7 @@ git log --oneline --graph --all
 - [x] 평가 항목 1~5별 해결 방법·증거 정리
 - [x] 점수 규칙·선택지 수를 한곳에 모아 요구사항 변경 범위 축소
 - [x] GitHub에 코드 반영 및 로컬/원격 main 해시 일치 (2026-11-16 확인)
-- [ ] 원격 clone → 변경·commit·push → 원본 pull 실습과 실제 증거
+- [x] 원격 clone → 변경·commit·push → 원본 pull 실습과 실제 증거
 - [ ] 학습자가 직접 실행하고 과제 목표를 스스로 설명할 수 있는지 확인
 
 평가자가 네이티브 터미널·에디터 자체의 스크린샷을 요구하면 본인 터미널에서 실행 화면을 별도로 촬영한다. 현재 이미지는 실제 출력 기록의 브라우저 캡처라는 점을 명확히 밝힌다.

@@ -1,0 +1,74 @@
+E1-2 원격 업로드·clone·pull 실제 실행
+2026-11-16 13:28:33 KST
+계정: 2dion
+저장소: 2dion/E1-2
+
+$ git pull --ff-only origin main (시작 전 동기화)
+https://github.com/2dion/E1-2 URL에서
+ * branch            main       -> FETCH_HEAD
+이미 업데이트 상태입니다.
+
+$ git push origin main feature/quiz-play
+remote: 
+remote: Create a pull request for 'feature/quiz-play' on GitHub by visiting:        
+remote:      https://github.com/2dion/E1-2/pull/new/feature/quiz-play        
+remote: 
+To https://github.com/2dion/E1-2.git
+ * [new branch]      feature/quiz-play -> feature/quiz-play
+
+업로드 후 main 해시 확인
+로컬·원격 일치: e221126d7e475f0efd9d51f25ff5472e1de7bece
+
+$ git clone https://github.com/2dion/E1-2.git /Users/leedongin/.aside/u/0/projects/codyssey-all-in-one/clone-practice/E1-2
+'/Users/leedongin/.aside/u/0/projects/codyssey-all-in-one/clone-practice/E1-2'에 복제합니다...
+
+$ git add README.md && git commit (복제본)
+[main 4b00698] Docs: 원격 복제본에서 동기화 실습 안내 추가
+ 1 file changed, 4 insertions(+)
+
+$ git push origin main (복제본)
+To https://github.com/2dion/E1-2.git
+   e221126..4b00698  main -> main
+
+$ git pull --ff-only origin main (원본)
+https://github.com/2dion/E1-2 URL에서
+ * branch            main       -> FETCH_HEAD
+   e221126..4b00698  main       -> origin/main
+업데이트 중 e221126..4b00698
+Fast-forward
+ README.md | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+$ grep 복제·동기화 README.md
+## 복제·동기화 실습 확인
+
+최종 로컬·원격 main 해시 비교
+동기화 완료: 4b006989b88208706f245fef11ac2105af15aa3a
+
+$ git log --oneline --graph --all
+* 4b00698 Docs: 원격 복제본에서 동기화 실습 안내 추가
+*   e221126 Merge: 평가 항목 기준 보강과 README 항목별 정리 병합 (#1)
+|\  
+| * 489041c Docs: 평가 항목 1~5별 해결 방법과 증거를 README에 정리
+| * 15388d3 Refactor: 점수 규칙과 선택지 수를 한곳에 모아 요구사항 변경 범위 축소
+|/  
+* 0b19634 Chore: gh 보안 인증을 사용하는 원격 업로드와 복제 실습 절차 추가
+* fdfdfaa Docs: 과제 목표 설명과 요구사항 대응 및 실제 실행 증거 정리
+* 2ca3caa Test: 게임과 입력 및 CLI 실행의 회귀 테스트 47개 추가
+* 4be7486 Fix: 저장 중 중단 처리 보강과 실제 CLI 재현 도구 및 초기 상태 추가
+* 7257dd4 Feat: UTF-8 JSON 원자적 저장과 손상 백업 및 안전 종료 구현
+* 881a22a Feat: 랜덤 출제와 문제 수 선택 및 힌트 삭제 히스토리 구현
+* fde9a9c Feat: 최고 점수 갱신과 미플레이 및 0점 상태 구분 구현
+* 88b0eb5 Feat: 퀴즈 목록 조회와 빈 목록 안내 구현
+* 249c779 Feat: 퀴즈 등록과 빈 내용 및 정답 범위 입력 검증 구현
+*   22018aa Merge: 별도 브랜치의 퀴즈 플레이 기능 병합
+|\  
+| * 69728a3 Feat: QuizGame 퀴즈 출제와 정답 판정 및 결과 표시 구현
+|/  
+* 1af7a7a Feat: Python 개발 기초 기본 퀴즈 8개 추가
+* d70ae7c Feat: Quiz 책임과 유효성 검사 및 단위 테스트 구현
+* 315c1b1 Feat: 메뉴와 공통 입력 검증 및 안전 종료 구현
+* 3460531 Docs: 사전 질문과 미션 개발 계획 정리
+* 4f0d26a Initial commit
+
+E1-2_REMOTE_PRACTICE_SUCCESS

@@ -32,7 +32,7 @@
 | 읽기/쓰기 오류 | `load_state/save_state`, `state_io.save_state` | PermissionError/OSError 주입, 원본 보존 테스트 |
 | EOF/Ctrl+C 시 안내·가능한 저장·종료 | `main.main`, `play`, `save_state` | 실제 SIGINT / EOF 로그, 중단 기록과 저장 중단 테스트 |
 | README 필수 항목 | 루트 `README.md` | 개요·선정 이유·실행·기능·구조·데이터 설명 |
-| clone 후 변경·commit·push, 원래 폴더 pull | `tools/publish_and_practice.sh` | main 업로드 완료. **clone/pull 실습 완료 전에는 통과로 표시하지 않음** |
+| clone 후 변경·commit·push, 원래 폴더 pull | `tools/publish_and_practice.sh` | 실습 완료, docs/evidence/git-remote-practice.txt |
 
 ## 3. 보너스 5개
 
