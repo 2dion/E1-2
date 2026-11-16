@@ -24,7 +24,7 @@
 | 플레이와 빈 퀴즈 처리 | `QuizGame.play` | 게임 단위 테스트, play 로그 |
 | 퀴즈 추가와 입력 검사·저장 | `add_quiz` | 추가·재시작 테스트, add-quiz / restart 로그 |
 | 목록·빈 목록 | `list_quizzes` | 게임 테스트, list 로그 |
-| 최고 점수 갱신·저장·미플레이 | `update_best_score`, `show_score`, `finish_session` | 미플레이와 0점 구분, 낮은 기록 유지, score 로그 |
+| 최고 점수 갱신·저장·미플레이 | `update_best_score`, `show_score`, `finish_session`, 점수 계산 `scoring.calculate_score` | 미플레이와 0점 구분, 낮은 기록 유지, score 로그 |
 | QuizGame 속성과 기능별 메서드 | `quiz_game.py` | 책임별 메서드 및 주석, README 목표 설명 |
 | 파일 저장·불러오기 | `state_io`, `QuizGame.load_state/save_state` | UTF-8·원자적 교체·재시작 테스트 |
 | 없는 파일은 기본 퀴즈 | `load_state` | 임시 폴더 테스트 |
@@ -32,7 +32,7 @@
 | 읽기/쓰기 오류 | `load_state/save_state`, `state_io.save_state` | PermissionError/OSError 주입, 원본 보존 테스트 |
 | EOF/Ctrl+C 시 안내·가능한 저장·종료 | `main.main`, `play`, `save_state` | 실제 SIGINT / EOF 로그, 중단 기록과 저장 중단 테스트 |
 | README 필수 항목 | 루트 `README.md` | 개요·선정 이유·실행·기능·구조·데이터 설명 |
-| clone 후 변경·commit·push, 원래 폴더 pull | 원격 인증 후 수행 | **원격 반영·실습 완료 전에는 통과로 표시하지 않음** |
+| clone 후 변경·commit·push, 원래 폴더 pull | `tools/publish_and_practice.sh` | main 업로드 완료. **clone/pull 실습 완료 전에는 통과로 표시하지 않음** |
 
 ## 3. 보너스 5개
 

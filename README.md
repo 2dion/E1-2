@@ -1,11 +1,13 @@
 # E1-2 · Python·개발 기초 퀴즈
 
 > Codyssey 입학 연수: 컴퓨터에게 명령 내리는 말(파이썬) 처음 배우기
-> 현재: **필수 기능·보너스 5개 로컬 구현 및 검증 완료. GitHub 업로드와 clone/pull 실습은 CLI 로그인 후 진행 예정.**
+> 현재: **필수 기능·보너스 5개 구현 및 검증 완료, 코드 GitHub 업로드 완료. clone/pull 실습은 진행 예정.**
+> 평가자는 [0. 평가 항목별 해결 정리](#evaluation)부터 보면 항목 1~5의 해결 방법과 증거를 바로 확인할 수 있다.
 > 코드와 설명은 AI 도움으로 작성·검증했다. 테스트 통과가 학습자가 내용을 스스로 설명했다는 뜻은 아니므로, 아래 과제 목표를 직접 확인한다.
 
 ## 목차
 
+- [평가 항목별 해결 정리](#evaluation)
 - [프로젝트 개요와 주제](#overview)
 - [실행과 메뉴](#run)
 - [구현 기능과 점수 규칙](#features)
@@ -15,6 +17,114 @@
 - [실제 검증과 스크린샷](#verification)
 - [Git 기록과 실습](#git-workflow)
 - [미션 조건 및 제출 현황](#submission)
+
+<a id="evaluation"></a>
+## 0. 평가 항목별 해결 정리 (평가자용 요약)
+
+평가 문항 1~5를 순서대로 따라가며 **무엇을 어떻게 해결했고, 어디서 확인하는지**를 한곳에 모았다. 각 행의 링크는 실제 실행 로그나 코드 위치다. 세부 개념 설명은 [6. 과제 목표를 설명하기](#learning)에 있다.
+
+### 바로 확인하는 명령
+
+```bash
+git clone https://github.com/2dion/E1-2.git
+cd E1-2
+python3 --version                           # 3.10 이상
+python3 -m unittest discover -s tests -v    # 89개 테스트, 프로젝트 state.json을 바꾸지 않음
+python3 tools/capture_evidence.py           # 임시 복사본에서 실제 CLI 시나리오 12개 재현
+python3 main.py                             # 직접 플레이
+git log --oneline --graph --all             # 커밋·브랜치·병합 기록
+```
+
+### 항목 1. 기능 동작 검증
+
+| 평가 문항 | 해결 방법 | 확인 위치 |
+| --- | --- | --- |
+| 메뉴 표시, 풀기·추가·목록·점수 확인 동작 | `QuizGame.run()`이 메뉴 번호마다 메서드 하나(`play`, `add_quiz`, `list_quizzes`, `show_score`)를 호출. 보너스로 삭제·히스토리 메뉴 추가 | [menu](docs/evidence/menu.txt) · [play](docs/evidence/play.txt) · [add-quiz](docs/evidence/add-quiz.txt) · [list](docs/evidence/list.txt) · [score](docs/evidence/score.txt) |
+| 정답/오답 판정 | 게임은 비교하지 않고 `quiz.is_correct(selected)`로 Quiz에게 요청. 오답이면 정답 번호를 알려 줌 | [play](docs/evidence/play.txt), `tests/test_quiz.py` |
+| 입력 오류 4가지: 공백, 문자, 범위 밖, 빈 입력 | `input_utils.read_int()`가 ① `strip()`으로 공백 제거 → ② 빈 값 안내 → ③ `int()` 실패(ValueError) 안내 → ④ 범위 검사 순서로 처리하고 다시 입력받음. 정답 입력(`ask_answer`)도 같은 순서 | [invalid-input](docs/evidence/invalid-input.txt) (입력 `\n`, `abc`, `9`, ` 0 `), `tests/test_input_utils.py` |
+| 재실행 후 추가 퀴즈·최고 점수 유지 | 추가·점수 갱신 직후 `state.json`에 UTF-8로 저장하고, 시작할 때 `load_state()`로 복원 | [restart](docs/evidence/restart.txt): 별도 프로세스에서 퀴즈 9개, 최고 5점 확인 |
+| 기본 퀴즈 5개 이상 | `defaults.py`에 Python·개발 기초 문제 8개, 각각 선택지 4개·정답·힌트 | `defaults.py`, `state.json` |
+| GitHub 업로드, 의미 있는 커밋 10개 이상 | 기능 단위 커밋 16개(이 보강 이전 기준, 빈 커밋 없음). 원격 `main`이 로컬과 같은 `0b19634`임을 2026-11-16 `git ls-remote`로 확인 | [git-history](docs/evidence/git-history.txt), GitHub 커밋 목록 |
+| 브랜치 생성·병합이 `git log --oneline --graph`에 보임 | `feature/quiz-play`에서 퀴즈 풀기를 구현하고 `--no-ff`로 병합해 병합 커밋 `22018aa`를 남김 | [git-history](docs/evidence/git-history.txt), [그래프 캡처](docs/screenshots/git-history.png) |
+| clone과 pull 실습 흔적 | **진행 예정.** `tools/publish_and_practice.sh`가 별도 폴더에 clone → README 한 줄 추가 → commit → push → 원본 폴더에서 `pull --ff-only` → 해시 비교를 실제로 실행하고 출력 전체를 `docs/evidence/git-remote-practice.txt`에 남긴다 | 실행 후 [8. Git 기록과 실습](#git-workflow)에 결과 추가 |
+
+### 항목 2. 코드 구조 및 설계
+
+| 평가 문항 | 설계와 근거 |
+| --- | --- |
+| Quiz와 QuizGame의 책임 | **Quiz**(`quiz.py`)는 문제 하나: 질문·선택지·정답·힌트를 검증해 보관하고 `display()`, `is_correct()`를 맡는다. **QuizGame**(`quiz_game.py`)은 게임 전체: 퀴즈 목록·최고 점수·기록을 갖고 메뉴·진행·추가·목록·점수·저장 시점을 조율한다. 판정 규칙은 Quiz 한곳에만 있다 |
+| 입력 / 게임 진행 / 저장 분리 기준 | 기준은 **"바뀌는 이유가 다르면 다른 파일"**. 입력 규칙은 `input_utils.py`(메뉴·문제 수·정답 번호에서 재사용), 게임 규칙은 `quiz_game.py`, 파일 형식·검증·원자적 저장은 `state_io.py`, 점수 규칙은 `scoring.py`, 시작·종료 조율은 `main.py` |
+| state.json 읽기/쓰기 흐름 | **읽기**: `main()` → `QuizGame()` 생성 → `load_state()` → `state_io.load_state()`가 UTF-8로 열어 `json.load` → `validate_state()` 검증 → `Quiz.from_dict()`로 객체 복원. **쓰기**: 퀴즈 추가·삭제 직후, 한 판이 끝난 직후(`finish_session`), 그리고 종료 시 `main()`의 `finally`에서 `save_state()` → `to_state()`로 딕셔너리 변환 → 임시 파일에 쓰고 `os.replace()`로 교체 |
+| Ctrl+C / EOF 안전 종료 | `input()`은 Ctrl+C에서 `KeyboardInterrupt`, 입력이 끝나면 `EOFError`를 낸다. 입력 함수는 이를 잡지 않고 바깥으로 보내(무한 재입력 방지), `main()`이 `except (EOFError, KeyboardInterrupt)`로 안내하고 `finally`에서 저장을 시도한다. 풀이 도중이면 `play()`가 그 판을 "중단"으로 기록한 뒤 다시 올려 보낸다. 저장 도중 Ctrl+C도 별도로 잡아 "저장 완료를 보장할 수 없음"을 알린다 |
+| 커밋 단위와 메시지 규칙 | 미션 기능 순서대로 **되돌리면 그 기능 하나만 빠지는 크기**로 나눴다(메뉴 → Quiz → 기본 데이터 → 브랜치에서 풀기 → 병합 → 추가 → 목록 → 점수 → 보너스 → 저장 → 수정 → 테스트 → 문서). 메시지는 `유형: 무엇을 했는지`이고 유형은 Feat·Fix·Test·Docs·Chore·Merge |
+
+### 항목 3. 핵심 기술 원리 적용
+
+- **클래스를 쓴 이유:** 함수만 쓰면 퀴즈 딕셔너리와 최고 점수를 전역 변수나 매개변수로 계속 넘겨야 하고, 정답 비교 같은 규칙이 여러 함수에 복사되기 쉽다. 클래스는 데이터(속성)와 그 데이터를 다루는 동작(메서드)을 묶어, `quiz.is_correct(2)`처럼 객체에게 일을 맡긴다. 생성자에서 값을 검사하므로 잘못된 퀴즈 객체가 만들어지지 않는다. 대신 작은 프로그램에서는 코드가 조금 길어진다.
+- **JSON을 쓴 이유와 특징:** 프로그램이 끝나면 메모리는 사라지므로 파일로 남겨야 한다. JSON은 사람이 읽을 수 있는 텍스트이고, 표준 라이브러리 `json`만으로 리스트·딕셔너리를 그대로 표현한다. 키는 큰따옴표 문자열이고 주석·마지막 쉼표를 허용하지 않는다. 사용자 정의 객체는 바로 저장되지 않아 `to_dict()` / `from_dict()`로 변환한다.
+- **파일 입출력에 try/except가 필요한 이유:** 파일은 프로그램 밖에 있어 코드가 맞아도 실패한다. 이 프로그램은 실패 원인별로 다르게 처리한다.
+
+  | 실패 상황 | 예외 | 처리 |
+  | --- | --- | --- |
+  | 첫 실행, 파일 없음 | `FileNotFoundError` | 기본 퀴즈 8개로 시작 |
+  | 문법이 깨진 JSON | `json.JSONDecodeError` | 원본을 `.bak`으로 백업한 뒤 기본값으로 복구 |
+  | UTF-8이 아닌 파일 | `UnicodeDecodeError` | 위와 동일 |
+  | 필드 누락·잘못된 값 | `ValueError` (검증) | 위와 동일 |
+  | 읽기 권한 없음 | `PermissionError`(`OSError`) | 손상으로 단정하지 않고, 원본 보호를 위해 이번 실행은 저장 안 함 |
+  | 쓰기 실패·디스크 부족 | `OSError` | "저장 실패, 변경은 메모리에만 있음" 안내, 종료 때 재시도 |
+
+- **브랜치와 병합:** `main`은 항상 실행 가능한 상태로 두고, 새 기능은 `feature/quiz-play`에서 만들었다. 실패해도 브랜치만 버리면 된다. 병합은 두 작업 흐름의 이력을 하나로 합치는 것이다. main에 새 커밋이 없으면 fast-forward로 흔적이 사라지므로 `--no-ff`로 병합 커밋을 남겨 그래프에서 보이게 했다.
+- **state.json 구조를 이렇게 설계한 이유:** 최상위를 객체로 두어 `quizzes`·`best_score`·`has_played`·`history`를 이름으로 구분한다. 그래서 히스토리를 나중에 추가해도 기존 키가 흔들리지 않았다. `quizzes`는 순서 있는 여러 개라 리스트이고, 각 원소는 Quiz 속성과 같은 키라 객체 ↔ 딕셔너리가 1:1로 대응한다. `answer`는 화면 번호와 같은 1~4로 저장해 리스트 인덱스(0~3)와 헷갈리지 않게 했다. `has_played`는 "아직 안 함"과 "했지만 0점"을 구분하고, `schema_version`은 구조가 바뀔 때 예전 파일을 변환할 근거가 된다.
+
+### 항목 4. 심층 인터뷰
+
+**① 퀴즈가 1000개 이상이 되면?** 현재 방식의 한계는 다음과 같다.
+
+- 퀴즈 하나를 추가해도 `save_state()`가 파일 전체를 다시 쓰고 `fsync`한다. 데이터가 클수록 저장마다 느려진다.
+- 시작할 때 전부 읽어 메모리에 올리고 모든 항목을 검증한다. 시작이 느려진다.
+- `history`는 판마다 계속 늘어나 퀴즈보다 먼저 커진다.
+- 주제별 검색, 틀린 문제만 같은 조회를 하려면 매번 전체를 훑어야 한다.
+- 파일이 하나라 한 곳이 깨지면 전체를 못 읽는다. 두 프로그램이 동시에 쓰면 나중에 쓴 쪽이 덮어쓴다.
+
+대안은 표준 라이브러리 `sqlite3`(행 단위 추가·수정, 검색, 트랜잭션), 기록은 한 줄씩 덧붙이는 JSON Lines, 퀴즈와 기록 파일 분리다. 다만 1000개 정도는 JSON으로도 충분히 빠르므로 바로 바꿀 필요는 없다.
+
+**② state.json이 손상되면?** 이미 구현한 대응은 다음과 같다.
+
+1. **예방:** 같은 폴더 임시 파일에 끝까지 쓰고 `flush`·`fsync` 후 `os.replace()`로 한 번에 교체한다. 저장 도중 멈춰도 반쯤 쓰인 파일이 남지 않는다.
+2. **백업 후 복구:** 파싱·인코딩·스키마 오류면 원본을 `state.json.corrupt-날짜시각.bak`으로 복사한 **다음에만** 기본값으로 실행한다. 백업에 실패하면 덮어쓰지 않도록 저장을 막는다. ([corrupt-recovery](docs/evidence/corrupt-recovery.txt))
+3. **원인 구분:** 권한 오류는 손상이 아니므로 백업·초기화하지 않고 원본을 그대로 둔다.
+
+더 할 수 있는 것: 저장할 때마다 직전 정상본을 남겨 손상 시 자동으로 되돌리기, 퀴즈 단위로 검증해 읽을 수 있는 문제만 살리기, 초기화 전에 "백업에서 복구 / 초기화 / 종료"를 사용자에게 묻기.
+
+**③ 채점 방식이나 선택지 개수가 바뀌면 어디부터 고치나?** 이번 보강으로 규칙을 한곳에 모았다.
+
+| 바뀌는 요구사항 | 먼저 고칠 곳 | 함께 확인할 곳 |
+| --- | --- | --- |
+| 점수 계산 (예: 정답 +3, 힌트 -2) | `scoring.py`의 `POINTS_PER_CORRECT`, `HINT_PENALTY`, `calculate_score()` | 안내 문구는 상수를 쓰므로 자동 반영. 단, `state_io._history_record()`가 저장된 기록의 점수를 같은 함수로 검증하므로, 예전 규칙의 기록이 손상으로 판정되지 않게 `schema_version`을 올리고 예전 기록은 예전 규칙으로 검증해야 한다. 기존 `best_score`를 유지할지 초기화할지도 정책으로 정한다 |
+| 선택지 개수 (예: 4개 → 5개) | `quiz.py`의 `CHOICE_COUNT` | Quiz 검증, `is_correct`, 정답 입력 범위, 추가 시 선택지 입력 반복은 상수를 따라 자동 반영. `defaults.py`의 기본 문제와 이미 저장된 `state.json`은 선택지가 4개라 새 구조로 변환하거나 문제를 보충해야 한다 |
+
+보강 전에는 `4`와 `* 2 - hints`가 `quiz.py`, `quiz_game.py`, `state_io.py` 여러 곳에 흩어져 있어 하나라도 빠뜨리면 동작이 어긋날 수 있었다. 지금은 `tests/test_scoring.py`가 상수와 검증 범위가 일치하는지 확인한다.
+
+### 항목 5. 보너스 문제 해결
+
+선택 보너스 5개를 모두 구현했다. 상세 규칙은 [3. 구현 기능과 점수 규칙](#features)에 있다.
+
+| 보너스 | 구현 | 확인 위치 |
+| --- | --- | --- |
+| 랜덤 출제 | `rng.sample()`로 중복 없이 뽑고 원본 순서는 유지 | [play](docs/evidence/play.txt), 고정 시드 테스트 |
+| 문제 수 선택 | 1~현재 문제 수 범위로 `read_int` | [play](docs/evidence/play.txt) |
+| 힌트 | `h` 입력, 문제당 1회만 -1점, 힌트 없으면 차감 없음 | [play](docs/evidence/play.txt) |
+| 퀴즈 삭제 | 번호 선택 → 확인/취소 → 저장 | [delete](docs/evidence/delete.txt) |
+| 점수 히스토리 | 날짜·시각, 선택/실제 풀이 수, 정답·힌트·점수, 완료/중단 저장 | [history](docs/evidence/history.txt) |
+
+### 가장 어려웠던 지점: 가설 → 확인 → 조치
+
+커밋 기록과 코드 주석을 바탕으로 정리했다. 인터뷰 전에 본인 경험과 맞는지 다시 확인한다.
+
+| 문제 | 가설 | 확인 | 조치 |
+| --- | --- | --- | --- |
+| 종료 직전 저장 중에 Ctrl+C를 다시 누르면 Traceback으로 끝남 | `main()`의 `finally`에서 부르는 `save_state()` 안에서 난 `KeyboardInterrupt`는 바깥 `except`가 이미 지나가서 잡히지 않는다 | `KeyboardInterrupt`는 `Exception`의 하위가 아니라 `except (OSError, ValueError)`에 걸리지 않음을 확인 | `save_state()`에서 `KeyboardInterrupt`를 따로 잡아 "저장 완료를 보장할 수 없음"을 알리고 `False`를 반환 (커밋 `4be7486`), 저장 중 중단 테스트 추가 |
+| 처음 `git push`가 실패함 | 코드나 원격 주소가 아니라 HTTPS 인증 정보가 없다 | `git remote -v`의 원격 주소는 맞았고, 작업 환경에 GitHub 인증 정보가 없었음 | GitHub CLI로 로그인한 뒤 그 명령에만 gh 인증을 쓰도록 `tools/publish_and_practice.sh` 작성. 토큰은 출력하거나 파일에 쓰지 않음 |
 
 <a id="overview"></a>
 ## 1. 프로젝트 개요와 주제
@@ -98,9 +208,10 @@ E1-2/
 ├── quiz.py                    # Quiz: 개별 문제와 정답 판정
 ├── defaults.py                # 복구에도 사용하는 기본 문제 8개
 ├── quiz_game.py               # QuizGame: 메뉴·진행·추가·점수·기록
+├── scoring.py                 # 점수 규칙(정답 +2, 힌트 -1)과 계산 함수
 ├── state_io.py                # JSON 검증·읽기·원자적 저장
 ├── state.json                 # 제출 초기값 및 실행 중 저장 데이터
-├── tests/                     # 86개 unittest 테스트
+├── tests/                     # 89개 unittest 테스트
 ├── tools/capture_evidence.py  # 임시 복사본에서 실제 CLI 증거 생성
 ├── docs/requirements.md       # 미션 조건별 구현·검증 대응
 ├── docs/evidence/             # 실제 실행·테스트·Git 로그
@@ -219,7 +330,8 @@ python3 tools/capture_evidence.py
 
 ### 검증 결과
 
-- **86개 unittest 통과.** 모델 16개, 저장·검증 23개, 입력 7개, 게임 31개, 실행·문법 9개. [실제 테스트 출력](docs/evidence/tests.txt)
+- **89개 unittest 통과.** 모델 16개, 저장·검증 23개, 입력 7개, 게임 31개, 실행·문법 9개, 점수 규칙·선택지 수 3개. [보강 후 테스트 출력](docs/evidence/tests-after-refactor.txt) · [최초 Mac 테스트 출력(86개)](docs/evidence/tests.txt)
+- 점수 규칙과 선택지 수를 상수로 모은 뒤 `capture_evidence.py`로 12개 시나리오를 다시 돌려, 화면 출력이 캡처 시각과 랜덤 출제 순서 외에는 기존 로그와 같음을 확인했다.
 - **12개 실제 CLI 시나리오 통과.** 메뉴·추가·목록·랜덤/힌트·점수·히스토리·재시작·삭제·입력 오류·EOF·실제 SIGINT·손상 복구.
 - 실행 환경: **Python 3.13.12**, Git 2.54.0. 모든 소스는 Python 3.10 문법 AST 검사 통과. **Python 3.10 실행기에서 전체 실행 시험을 한 것은 아니다.**
 - 추가된 퀴즈 9개와 최고 5점을 다른 프로세스에서 다시 불러오는 것을 확인했다. 손상 파일의 백업과 기본 8개 복구도 확인했다.
@@ -245,7 +357,7 @@ python3 tools/capture_evidence.py
 <a id="git-workflow"></a>
 ## 8. Git 기록과 실습
 
-로컬은 **최소 10개의 의미 있는 커밋** 조건을 충족한다. 원격에는 아직 초기 커밋만 있고 이후 개발 기록은 업로드 전이다. 정확한 최신 수와 원격 차이는 `git rev-list --count HEAD`, `git status --short --branch`로 확인한다. Git 그래프 이미지는 캡처 시점의 기록이며, 캡처 파일 자체를 저장하는 후속 커밋은 이미지에 포함되지 않을 수 있다.
+로컬은 **최소 10개의 의미 있는 커밋** 조건을 충족한다. `main`은 GitHub에 업로드했고 2026-11-16 기준 원격 해시가 로컬과 같다. `feature/quiz-play` 브랜치는 아직 원격에 올리지 않았지만 병합 기록은 main 그래프에 남아 있다. 정확한 최신 수와 원격 차이는 `git rev-list --count HEAD`, `git status --short --branch`로 확인한다. Git 그래프 이미지는 캡처 시점의 기록이며, 캡처 파일 자체를 저장하는 후속 커밋은 이미지에 포함되지 않을 수 있다.
 
 - `main`: 필수·보너스 기능과 저장·복구 통합.
 - `feature/quiz-play`: 플레이 기능 구현 후 main에 병합. 추적 가능한 실습 기록으로 남김.
@@ -261,14 +373,14 @@ git log --oneline --graph --all
 
 위는 실제 수행한 흐름의 요약이다. 기능별 커밋은 메뉴, Quiz, 기본 데이터, 플레이, 추가, 목록, 점수, 보너스, 파일 저장, 안전 종료 등으로 나누었다. 빈 커밋으로 개수를 채우지 않았다. [실제 Git 로그](docs/evidence/git-history.txt)
 
-**아직 진행 전인 항목:** 처음 HTTPS push는 작업 환경의 인증 부재로 실패했다. 공식 GitHub CLI를 로컬 `.tools/gh`에 준비했고 로그인 후 다음 순서로 수행한다. 아직 실행하지 않은 명령을 완료 기록으로 보지 않는다.
+**main 업로드는 완료, clone/pull 실습은 진행 예정:** 처음 HTTPS push는 작업 환경의 인증 부재로 실패했고, 이후 main을 업로드했다. 남은 실습은 로그인된 Mac 터미널에서 `bash tools/publish_and_practice.sh` 한 번으로 아래 순서를 실제 실행하고 출력 전체를 `docs/evidence/git-remote-practice.txt`에 남긴다. 아직 실행하지 않은 명령을 완료 기록으로 보지 않는다.
 
-1. `gh` 인증 상태를 확인하고 HTTPS Git 인증과 연결.
+1. 원격에서 먼저 병합된 커밋을 `git pull --ff-only`로 받아 동기화.
 2. 원본 저장소의 main과 플레이 브랜치를 push하고 원격 해시 확인.
 3. 별도 폴더에 실제 원격 저장소를 clone.
 4. 복제 폴더에서 README에 유용한 한 줄 추가 → commit → push.
 5. 원본 폴더에서 `git pull --ff-only` 후 해당 줄과 커밋 확인.
-6. 실제 명령·성공 출력·최종 그래프를 증거에 추가.
+6. 실제 명령·성공 출력·최종 그래프를 증거에 추가. 생성된 로그 파일을 commit·push하고 이 절과 [항목 1 표](#evaluation)의 "진행 예정"을 결과로 바꾼다.
 
 <a id="submission"></a>
 ## 9. 미션 조건 및 제출 현황
@@ -281,7 +393,9 @@ git log --oneline --graph --all
 - [x] 10개 이상의 실제 커밋과 플레이 브랜치 생성·병합
 - [x] 테스트 결과 및 환경·실행·Git 그래프 캡처
 - [x] README 필수 항목과 과제 목표별 개념·코드 설명
-- [ ] GitHub에 최종 코드 반영 및 로컬/원격 해시 일치
+- [x] 평가 항목 1~5별 해결 방법·증거 정리
+- [x] 점수 규칙·선택지 수를 한곳에 모아 요구사항 변경 범위 축소
+- [x] GitHub에 코드 반영 및 로컬/원격 main 해시 일치 (2026-11-16 확인)
 - [ ] 원격 clone → 변경·commit·push → 원본 pull 실습과 실제 증거
 - [ ] 학습자가 직접 실행하고 과제 목표를 스스로 설명할 수 있는지 확인
 

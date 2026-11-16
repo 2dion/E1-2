@@ -1,0 +1,165 @@
+E1-2 테스트 재실행 결과 (점수 규칙·선택지 수 상수화 이후)
+2026-11-16 03:59:20 UTC
+실행 환경: 클라우드 Linux 작업 환경, Python 3.13.18. 학습자 Mac에서 다시 실행하면 이 파일을 교체한다.
+
+$ python3 -m unittest discover -s tests -v
+test_eof_propagates_from_both_readers (test_input_utils.InputUtilsTests.test_eof_propagates_from_both_readers)
+입력 끝은 재시도하지 않고 호출자에게 같은 예외로 전달한다. ... ok
+test_integer_retries_blank_and_whitespace (test_input_utils.InputUtilsTests.test_integer_retries_blank_and_whitespace)
+빈 줄과 공백 줄은 각각 안내하고 다시 읽는다. ... ok
+test_integer_retries_both_out_of_range_sides (test_input_utils.InputUtilsTests.test_integer_retries_both_out_of_range_sides)
+허용 범위보다 작은 수와 큰 수를 모두 거절한다. ... ok
+test_integer_retries_non_number (test_input_utils.InputUtilsTests.test_integer_retries_non_number)
+abc를 숫자로 오인하거나 예외로 종료하지 않는다. ... ok
+test_integer_strips_and_accepts_upper_boundary (test_input_utils.InputUtilsTests.test_integer_strips_and_accepts_upper_boundary)
+숫자 주변 공백을 제거하고 최댓값을 받아들인다. ... ok
+test_keyboard_interrupt_propagates_after_retry (test_input_utils.InputUtilsTests.test_keyboard_interrupt_propagates_after_retry)
+잘못된 입력 뒤의 Ctrl+C도 삼키지 않는다. ... ok
+test_text_retries_blank_then_strips_valid_text (test_input_utils.InputUtilsTests.test_text_retries_blank_then_strips_valid_text)
+빈 내용은 반복하고 한글 내용의 양끝 공백만 제거한다. ... ok
+test_cli_empty_stdin_eof_saves_defaults (test_main.MainCliTests.test_cli_empty_stdin_eof_saves_defaults)
+input=''의 진짜 EOF에서 즉시 안전 종료하고 초기 상태를 저장한다. ... ok
+test_cli_eof_during_play_persists_interrupted_history (test_main.MainCliTests.test_cli_eof_during_play_persists_interrupted_history)
+메뉴·문제 수만 입력한 뒤 EOF가 오면 미완료 판을 실제 파일에 남긴다. ... ok
+test_cli_invalid_menu_then_exit (test_main.MainCliTests.test_cli_invalid_menu_then_exit)
+빈칸·문자·범위 오류 뒤 0번을 받아 정상 종료한다. ... ok
+test_cli_state_path_is_module_relative_not_cwd (test_main.MainCliTests.test_cli_state_path_is_module_relative_not_cwd)
+다른 CWD의 동명 파일은 건드리지 않고 코드 옆 파일만 저장한다. ... ok
+test_constructor_interrupt_has_no_uninitialized_save (test_main.MainTests.test_constructor_interrupt_has_no_uninitialized_save)
+생성 도중 중단되면 아직 없는 게임에 저장을 요청하지 않는다. ... ok
+test_eof_from_game_saves_and_reports_safe_exit (test_main.MainTests.test_eof_from_game_saves_and_reports_safe_exit)
+EOF는 추적 로그 없이 종료 안내와 저장으로 처리한다. ... ok
+test_keyboard_interrupt_from_game_saves_and_reports_safe_exit (test_main.MainTests.test_keyboard_interrupt_from_game_saves_and_reports_safe_exit)
+Ctrl+C도 실행 실패로 전파하지 않고 마지막 저장을 호출한다. ... ok
+test_normal_exit_saves_once (test_main.MainTests.test_normal_exit_saves_once)
+정상 메뉴 종료도 finally를 통해 한 번 저장한다. ... ok
+test_all_application_and_test_sources_parse_as_python_310 (test_main.PythonCompatibilityTests.test_all_application_and_test_sources_parse_as_python_310)
+루트 코드와 기존·신규 테스트를 모두 3.10 문법 규칙으로 파싱한다. ... ok
+test_accepts_answer_boundaries (test_quiz.QuizTests.test_accepts_answer_boundaries)
+정답 번호의 양 끝값인 1과 4를 허용한다. ... ok
+test_constructor_copies_input_choices (test_quiz.QuizTests.test_constructor_copies_input_choices)
+생성 후 원본 리스트를 고쳐도 퀴즈의 보기는 바뀌지 않는다. ... ok
+test_display_prints_question_and_numbered_choices_only (test_quiz.QuizTests.test_display_prints_question_and_numbered_choices_only)
+출력에는 질문과 번호 매긴 보기만 있고 정답과 힌트는 없다. ... ok
+test_from_dict_rejects_wrong_container_or_missing_fields (test_quiz.QuizTests.test_from_dict_rejects_wrong_container_or_missing_fields)
+딕셔너리가 아니거나 필수 항목이 빠지면 ValueError를 발생시킨다. ... ok
+test_from_dict_restores_with_optional_hint_and_copy (test_quiz.QuizTests.test_from_dict_restores_with_optional_hint_and_copy)
+복원 시 기본 힌트, 문자열 정리, 원본 보기 복사를 적용한다. ... ok
+test_from_dict_validates_every_field (test_quiz.QuizTests.test_from_dict_validates_every_field)
+딕셔너리 복원도 생성자와 동일한 검증 규칙을 따른다. ... ok
+test_hint_defaults_to_empty_and_requires_string (test_quiz.QuizTests.test_hint_defaults_to_empty_and_requires_string)
+힌트는 생략하거나 공백으로 둘 수 있지만 문자열이어야 한다. ... ok
+test_invalid_selection_returns_false_without_raising (test_quiz.QuizTests.test_invalid_selection_returns_false_without_raising)
+선택 오류는 예외 대신 False로 처리하며 bool도 거부한다. ... ok
+test_is_correct_distinguishes_valid_selections (test_quiz.QuizTests.test_is_correct_distinguishes_valid_selections)
+네 개의 유효한 선택 중 정답에만 True를 반환한다. ... ok
+test_rejects_blank_or_nonstring_choice (test_quiz.QuizTests.test_rejects_blank_or_nonstring_choice)
+보기 하나라도 비었거나 문자열이 아니면 거부한다. ... ok
+test_rejects_invalid_answer_including_bool (test_quiz.QuizTests.test_rejects_invalid_answer_including_bool)
+범위를 벗어난 정수와 bool 등 다른 타입은 정답이 될 수 없다. ... ok
+test_rejects_invalid_question (test_quiz.QuizTests.test_rejects_invalid_question)
+비어 있거나 문자열이 아닌 질문은 허용하지 않는다. ... ok
+test_requires_exact_list_for_choices (test_quiz.QuizTests.test_requires_exact_list_for_choices)
+보기 묶음은 튜플이나 리스트 하위 클래스가 아닌 리스트여야 한다. ... ok
+test_requires_exactly_four_choices (test_quiz.QuizTests.test_requires_exactly_four_choices)
+보기 개수의 하한과 상한을 확인한다. ... ok
+test_strips_unicode_question_choices_and_hint (test_quiz.QuizTests.test_strips_unicode_question_choices_and_hint)
+한글과 유니코드 문자는 보존하고 양끝 공백만 없앤다. ... ok
+test_to_dict_has_expected_values_and_defensive_copy (test_quiz.QuizTests.test_to_dict_has_expected_values_and_defensive_copy)
+내보낸 데이터의 키와 값을 확인하고 수정 영향이 없는지 검사한다. ... ok
+test_add_valid_persists_and_restarts (test_quiz_game.QuizGameTests.test_add_valid_persists_and_restarts)
+모든 항목을 받은 문제는 정리한 값으로 저장하고 재시작해 복원한다. ... ok
+test_backup_failure_blocks_write_and_preserves_source (test_quiz_game.QuizGameTests.test_backup_failure_blocks_write_and_preserves_source)
+백업 실패 시 원본 보호가 우선이며 이후 저장도 막는다. ... ok
+test_best_score_retained_after_lower_completed_score (test_quiz_game.QuizGameTests.test_best_score_retained_after_lower_completed_score)
+다음 판이 낮은 점수여도 기존 최고 점수와 완료 기록을 유지한다. ... ok
+test_clean_save_does_not_rewrite (test_quiz_game.QuizGameTests.test_clean_save_does_not_rewrite)
+변경 없는 상태의 종료 저장은 파일을 다시 쓰지 않는다. ... ok
+test_completed_history_has_timezone_counts_and_persisted_score (test_quiz_game.QuizGameTests.test_completed_history_has_timezone_counts_and_persisted_score)
+완료 기록의 필수 항목·시간대·점수 산식과 재시작 보존을 확인한다. ... ok
+test_delete_cancellation_at_both_prompts_preserves_file (test_quiz_game.QuizGameTests.test_delete_cancellation_at_both_prompts_preserves_file)
+번호 선택과 최종 확인에서 취소해도 메모리·파일은 그대로다. ... ok
+test_delete_confirm_persists_empty_collection (test_quiz_game.QuizGameTests.test_delete_confirm_persists_empty_collection)
+마지막 문제를 지운 빈 목록을 저장하고 기본 문제로 되돌리지 않는다. ... ok
+test_delete_empty_never_requests_input (test_quiz_game.QuizGameTests.test_delete_empty_never_requests_input)
+빈 목록 삭제는 번호를 묻지 않고 안내로 끝난다. ... ok
+test_eof_before_first_answer_saves_interrupted_history (test_quiz_game.QuizGameTests.test_eof_before_first_answer_saves_interrupted_history)
+첫 응답 전 EOF도 미완료 기록으로 저장하되 최고 점수는 건드리지 않는다. ... ok
+test_explicit_state_path_survives_different_working_directory (test_quiz_game.QuizGameTests.test_explicit_state_path_survives_different_working_directory)
+실행 위치를 바꾸어도 명시한 절대 경로만 읽고 쓴다. ... ok
+test_hint_missing_never_deducts_points (test_quiz_game.QuizGameTests.test_hint_missing_never_deducts_points)
+힌트 없는 문제의 h 요청은 여러 번이어도 차감하지 않는다. ... ok
+test_history_output_empty_then_completed_and_interrupted (test_quiz_game.QuizGameTests.test_history_output_empty_then_completed_and_interrupted)
+히스토리는 빈 상태와 완료·중단의 시각 및 풀이 수를 구분해 보여 준다. ... ok
+test_incomplete_add_never_mutates_or_saves (test_quiz_game.QuizGameTests.test_incomplete_add_never_mutates_or_saves)
+질문·보기·마지막 힌트 입력 중단 어느 단계도 미완성 등록을 남기지 않는다. ... ok
+test_interrupt_after_hint_preserves_hint_and_existing_best (test_quiz_game.QuizGameTests.test_interrupt_after_hint_preserves_hint_and_existing_best)
+미응답 문제의 사용 힌트도 기록하며 EOF와 Ctrl+C 모두 기존 최고값을 지킨다. ... ok
+test_invalid_answers_retry_without_counting_attempts (test_quiz_game.QuizGameTests.test_invalid_answers_retry_without_counting_attempts)
+빈칸·문자·범위 오류는 응답 수나 힌트 수를 늘리지 않는다. ... ok
+test_invalid_json_backup_and_restore (test_quiz_game.QuizGameTests.test_invalid_json_backup_and_restore)
+깨진 JSON 원본을 백업한 뒤 정상 기본 상태를 저장한다. ... ok
+test_invalid_schema_backup_and_restore (test_quiz_game.QuizGameTests.test_invalid_schema_backup_and_restore)
+JSON 문법이 맞아도 점수 타입이 잘못되면 전체 상태를 복구한다. ... ok
+test_invalid_utf8_backup_and_restore (test_quiz_game.QuizGameTests.test_invalid_utf8_backup_and_restore)
+UTF-8 디코딩 실패도 원본 바이트를 손실 없이 백업한다. ... ok
+test_keyboard_after_correct_answer_does_not_update_best (test_quiz_game.QuizGameTests.test_keyboard_after_correct_answer_does_not_update_best)
+정답 점수가 생긴 판도 Ctrl+C 중단이면 최고 기록으로 인정하지 않는다. ... ok
+test_list_empty (test_quiz_game.QuizGameTests.test_list_empty)
+문제가 없을 때 명확한 빈 목록 안내를 제공한다. ... ok
+test_list_nonempty_does_not_reveal_answer_or_hint (test_quiz_game.QuizGameTests.test_list_nonempty_does_not_reveal_answer_or_hint)
+번호와 질문만 보여 주고 보기·정답·힌트는 공개하지 않는다. ... ok
+test_missing_file_uses_defaults_without_early_write (test_quiz_game.QuizGameTests.test_missing_file_uses_defaults_without_early_write)
+없는 파일은 기본 여덟 문제로 시작하고 저장 전에는 생성하지 않는다. ... ok
+test_play_empty_does_not_start_history (test_quiz_game.QuizGameTests.test_play_empty_does_not_start_history)
+빈 목록에서는 풀이 입력이나 게임 기록을 만들지 않는다. ... ok
+test_random_sample_count_unique_order_and_injected_determinism (test_quiz_game.QuizGameTests.test_random_sample_count_unique_order_and_injected_determinism)
+주입한 난수 시드의 표본만 풀며 원본 순서와 객체를 보존한다. ... ok
+test_read_permission_error_patches_imported_target_and_blocks_save (test_quiz_game.QuizGameTests.test_read_permission_error_patches_imported_target_and_blocks_save)
+실제 호출 대상 별칭에 읽기 권한 오류를 주입하여 잘못된 복구를 막는다. ... ok
+test_repeated_hint_deducts_once (test_quiz_game.QuizGameTests.test_repeated_hint_deducts_once)
+같은 문제의 대소문자 h 재요청은 최초 한 번만 차감한다. ... ok
+test_run_routes_every_menu_and_exits (test_quiz_game.QuizGameTests.test_run_routes_every_menu_and_exits)
+유효한 메뉴는 해당 메서드로 전달하고 종료 뒤 추가 입력을 하지 않는다. ... ok
+test_save_keyboard_interrupt_reports_uncertainty_and_retains_dirty (test_quiz_game.QuizGameTests.test_save_keyboard_interrupt_reports_uncertainty_and_retains_dirty)
+최종 저장 중 재차 Ctrl+C가 와도 성공으로 알리지 않고 재시도 가능하게 둔다. ... ok
+test_save_oserror_is_honest_retains_dirty_and_original (test_quiz_game.QuizGameTests.test_save_oserror_is_honest_retains_dirty_and_original)
+교체 실패를 성공으로 알리지 않고 메모리 변경과 이전 파일을 보존한다. ... ok
+test_score_distinguishes_unplayed_from_completed_zero (test_quiz_game.QuizGameTests.test_score_distinguishes_unplayed_from_completed_zero)
+완료 전 상태와 완료했지만 0점인 상태를 구분한다. ... ok
+test_score_lower_bound_with_wrong_hinted_answers (test_quiz_game.QuizGameTests.test_score_lower_bound_with_wrong_hinted_answers)
+오답과 힌트로 계산 결과가 음수여도 최종 저장 점수는 0이다. ... ok
+test_quiz_uses_choice_count (test_scoring.ChoiceCountTests.test_quiz_uses_choice_count)
+보기 수와 정답 범위가 CHOICE_COUNT를 따른다. ... ok
+test_mission_rule_examples (test_scoring.ScoringTests.test_mission_rule_examples)
+정답 +2점, 힌트 -1점 규칙의 대표 사례를 계산한다. ... ok
+test_score_never_below_zero (test_scoring.ScoringTests.test_score_never_below_zero)
+힌트를 정답보다 많이 써도 0점 아래로 내려가지 않는다. ... ok
+test_flush_and_fsync_happen_before_replace (test_state_io.StateFileTests.test_flush_and_fsync_happen_before_replace) ... ok
+test_fsync_and_serialization_failures_preserve_and_cleanup (test_state_io.StateFileTests.test_fsync_and_serialization_failures_preserve_and_cleanup) ... ok
+test_full_roundtrip_utf8_pretty_json_and_newline (test_state_io.StateFileTests.test_full_roundtrip_utf8_pretty_json_and_newline) ... ok
+test_invalid_save_validates_before_file_operations (test_state_io.StateFileTests.test_invalid_save_validates_before_file_operations) ... ok
+test_load_malformed_empty_json_and_invalid_utf8 (test_state_io.StateFileTests.test_load_malformed_empty_json_and_invalid_utf8) ... ok
+test_load_missing_and_unreadable_errors (test_state_io.StateFileTests.test_load_missing_and_unreadable_errors) ... ok
+test_load_valid_json_with_bad_schema (test_state_io.StateFileTests.test_load_valid_json_with_bad_schema) ... ok
+test_missing_or_non_directory_parent_not_created (test_state_io.StateFileTests.test_missing_or_non_directory_parent_not_created) ... ok
+test_replace_failure_preserves_previous_bytes_and_cleans_temp (test_state_io.StateFileTests.test_replace_failure_preserves_previous_bytes_and_cleans_temp) ... ok
+test_all_history_records_preserved_and_late_invalid_rejected (test_state_io.StateValidationTests.test_all_history_records_preserved_and_late_invalid_rejected) ... ok
+test_completed_records_imply_played_even_with_zero_score (test_state_io.StateValidationTests.test_completed_records_imply_played_even_with_zero_score) ... ok
+test_completion_boolean_and_answer_count (test_state_io.StateValidationTests.test_completion_boolean_and_answer_count) ... ok
+test_empty_quizzes_and_legacy_highest_score (test_state_io.StateValidationTests.test_empty_quizzes_and_legacy_highest_score) ... ok
+test_history_datetime_formats_and_timezones (test_state_io.StateValidationTests.test_history_datetime_formats_and_timezones) ... ok
+test_history_integer_types_and_bounds (test_state_io.StateValidationTests.test_history_integer_types_and_bounds) ... ok
+test_history_required_fields_and_record_types (test_state_io.StateValidationTests.test_history_required_fields_and_record_types) ... ok
+test_interrupted_and_unanswered_history (test_state_io.StateValidationTests.test_interrupted_and_unanswered_history) ... ok
+test_minimal_legacy_defaults_and_normalization (test_state_io.StateValidationTests.test_minimal_legacy_defaults_and_normalization) ... ok
+test_new_nested_values_unknown_keys_and_original_unchanged (test_state_io.StateValidationTests.test_new_nested_values_unknown_keys_and_original_unchanged) ... ok
+test_optional_boolean_and_list_types (test_state_io.StateValidationTests.test_optional_boolean_and_list_types) ... ok
+test_outer_dictionary_and_required_fields (test_state_io.StateValidationTests.test_outer_dictionary_and_required_fields) ... ok
+test_quiz_validation_and_mutated_class_fields (test_state_io.StateValidationTests.test_quiz_validation_and_mutated_class_fields) ... ok
+test_schema_integer_types_and_ranges (test_state_io.StateValidationTests.test_schema_integer_types_and_ranges) ... ok
+
+----------------------------------------------------------------------
+Ran 89 tests in 0.278s
+
+OK

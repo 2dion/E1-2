@@ -1,5 +1,9 @@
 """문제의 내용과 정답 판정을 책임지는 퀴즈 클래스를 정의한다."""
 
+# 선택지 개수는 퀴즈 구조의 규칙이므로 Quiz 옆에 한 번만 정의한다.
+# 게임 입력 범위와 저장 검증도 이 값을 가져다 쓴다.
+CHOICE_COUNT = 4
+
 
 class Quiz:
     """문제 한 개를 보관하고, 보기 출력과 정답 판정을 담당한다."""
@@ -10,13 +14,13 @@ class Quiz:
         """입력값을 검사하고 문자열 양끝의 공백을 제거해 저장한다."""
         if not isinstance(question, str) or not question.strip():
             raise ValueError("질문은 공백이 아닌 문자열이어야 합니다.")
-        if type(choices) is not list or len(choices) != 4:
-            raise ValueError("보기는 정확히 네 개를 담은 리스트여야 합니다.")
+        if type(choices) is not list or len(choices) != CHOICE_COUNT:
+            raise ValueError(f"보기는 정확히 {CHOICE_COUNT}개를 담은 리스트여야 합니다.")
         if any(not isinstance(choice, str) or not choice.strip() for choice in choices):
             raise ValueError("각 보기는 공백이 아닌 문자열이어야 합니다.")
         # bool은 int의 하위 타입이므로 정확한 타입을 검사한다.
-        if type(answer) is not int or not 1 <= answer <= 4:
-            raise ValueError("정답 번호는 1부터 4 사이의 정수여야 합니다.")
+        if type(answer) is not int or not 1 <= answer <= CHOICE_COUNT:
+            raise ValueError(f"정답 번호는 1부터 {CHOICE_COUNT} 사이의 정수여야 합니다.")
         if not isinstance(hint, str):
             raise ValueError("힌트는 문자열이어야 합니다.")
 
@@ -28,7 +32,7 @@ class Quiz:
 
     def is_correct(self, selected: int) -> bool:
         """유효한 선택이 정답인지 반환하며, 잘못된 선택은 False로 처리한다."""
-        if type(selected) is not int or not 1 <= selected <= 4:
+        if type(selected) is not int or not 1 <= selected <= CHOICE_COUNT:
             return False
         return selected == self.answer
 
