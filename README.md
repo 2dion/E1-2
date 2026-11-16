@@ -2,169 +2,22 @@
 
 > Codyssey 입학 연수: 컴퓨터에게 명령 내리는 말(파이썬) 처음 배우기
 > 현재: **필수 기능·보너스 5개 구현 및 검증 완료, 코드 GitHub 업로드 완료. clone/pull 실습 완료.**
-> 평가자는 [0. 평가 항목별 해결 정리](#evaluation)부터 보면 항목 1\~5의 해결 방법과 증거를 바로 확인할 수 있다.
+> 평가자는 [8. 평가 항목별 해결 정리](#evaluation)부터 보면 항목 1\~5의 해결 방법과 증거를 바로 확인할 수 있다.
 > 코드와 설명은 AI 도움으로 작성·검증했다. 테스트 통과가 학습자가 내용을 스스로 설명했다는 뜻은 아니므로, 아래 과제 목표를 직접 확인한다.
 
 ## 목차
 
-- [평가 항목별 해결 정리](#evaluation)
-  - [제출 스크린샷](#screenshots)
-- [프로젝트 개요와 주제](#overview)
-- [실행과 메뉴](#run)
-- [구현 기능과 점수 규칙](#features)
-- [파일 구조와 객체의 책임](#structure)
-- [데이터 파일과 복구 정책](#data)
-- [과제 목표를 설명하기](#learning)
-- [실제 검증과 스크린샷](#verification)
-- [Git 기록과 실습](#git-workflow)
-- [미션 조건 및 제출 현황](#submission)
-
-<a id="evaluation"></a>
-## 0. 평가 항목별 해결 정리 (평가자용 요약)
-
-평가 문항 1\~5를 순서대로 따라가며 **무엇을 어떻게 해결했고, 어디서 확인하는지**를 한곳에 모았다. 각 행의 링크는 실제 실행 로그나 코드 위치다. 세부 개념 설명은 [6. 과제 목표를 설명하기](#learning)에 있다.
-
-### 바로 확인하는 명령
-
-```bash
-git clone https://github.com/2dion/E1-2.git
-cd E1-2
-python3 --version                           # 3.10 이상
-python3 -m unittest discover -s tests -v    # 90개 테스트, 프로젝트 state.json을 바꾸지 않음
-python3 tools/capture_evidence.py           # 임시 복사본에서 실제 CLI 시나리오 12개 재현
-python3 main.py                             # 직접 플레이
-git log --oneline --graph --all             # 커밋·브랜치·병합 기록
-```
-
-### 항목 1. 기능 동작 검증
-
-| 평가 문항 | 해결 방법 | 확인 위치 |
-| --- | --- | --- |
-| 메뉴 표시, 풀기·추가·목록·점수 확인 동작 | `QuizGame.run()`이 메뉴 번호마다 메서드 하나(`play`, `add_quiz`, `list_quizzes`, `show_score`)를 호출. 보너스로 삭제·히스토리 메뉴 추가 | [menu](docs/evidence/menu.txt) · [play](docs/evidence/play.txt) · [add-quiz](docs/evidence/add-quiz.txt) · [list](docs/evidence/list.txt) · [score](docs/evidence/score.txt) |
-| 정답/오답 판정 | 게임은 비교하지 않고 `quiz.is_correct(selected)`로 Quiz에게 요청. 오답이면 정답 번호를 알려 줌 | [play](docs/evidence/play.txt), `tests/test_quiz.py` |
-| 입력 오류 4가지: 공백, 문자, 범위 밖, 빈 입력 | `input_utils.read_int()`가 ① `strip()`으로 공백 제거 → ② 빈 값 안내 → ③ `int()` 실패(ValueError) 안내 → ④ 범위 검사 순서로 처리하고 다시 입력받음. 정답 입력(`ask_answer`)도 같은 순서 | [invalid-input](docs/evidence/invalid-input.txt) (입력 `\n`, `abc`, `9`, ` 0 `), `tests/test_input_utils.py` |
-| 재실행 후 추가 퀴즈·최고 점수 유지 | 추가·점수 갱신 직후 `state.json`에 UTF-8로 저장하고, 시작할 때 `load_state()`로 복원. 복원에 성공하면 첫 화면에 "저장된 데이터를 불러왔습니다. (퀴즈 N개, 최고 점수 M점)"을 출력 | [restart](docs/evidence/restart.txt): 별도 프로세스에서 퀴즈 9개, 최고 5점 확인 |
-| 기본 퀴즈 5개 이상 | `defaults.py`에 Python·개발 기초 문제 8개, 각각 선택지 4개·정답·힌트 | `defaults.py`, `state.json` |
-| GitHub 업로드, 의미 있는 커밋 10개 이상 | 기능 단위 커밋 16개(이 보강 이전 기준, 빈 커밋 없음). 2026-11-16 실습 스크립트가 `main`과 `feature/quiz-play`를 모두 원격에 push했고, 실습 후 원격 `main`이 로컬과 같은 `4b00698`임을 `git ls-remote`로 확인 | [git-history](docs/evidence/git-history.txt), GitHub 커밋 목록 |
-| 브랜치 생성·병합이 `git log --oneline --graph`에 보임 | `feature/quiz-play`에서 퀴즈 풀기를 구현하고 `--no-ff`로 병합해 병합 커밋 `22018aa`를 남김 | [git-history](docs/evidence/git-history.txt), [그래프 캡처](#screenshots) |
-| clone과 pull 실습 흔적 | 별도 폴더에 clone → README 한 줄 추가 → commit → push → 원본 폴더에서 `git pull --ff-only` → 로컬·원격 main 해시 일치 확인을 `tools/publish_and_practice.sh`로 실제 실행 | [git-remote-practice](docs/evidence/git-remote-practice.txt), 복제본 커밋 `4b00698` |
-
-### 항목 2. 코드 구조 및 설계
-
-| 평가 문항 | 설계와 근거 |
-| --- | --- |
-| Quiz와 QuizGame의 책임 | **Quiz**(`quiz.py`)는 문제 하나: 질문·선택지·정답·힌트를 검증해 보관하고 `display()`, `is_correct()`를 맡는다. **QuizGame**(`quiz_game.py`)은 게임 전체: 퀴즈 목록·최고 점수·기록을 갖고 메뉴·진행·추가·목록·점수·저장 시점을 조율한다. 판정 규칙은 Quiz 한곳에만 있다 |
-| 입력 / 게임 진행 / 저장 분리 기준 | 기준은 **"바뀌는 이유가 다르면 다른 파일"**. 입력 규칙은 `input_utils.py`(메뉴·문제 수·정답 번호에서 재사용), 게임 규칙은 `quiz_game.py`, 파일 형식·검증·원자적 저장은 `state_io.py`, 점수 규칙은 `scoring.py`, 시작·종료 조율은 `main.py` |
-| state.json 읽기/쓰기 흐름 | **읽기**: `main()` → `QuizGame()` 생성 → `load_state()` → `state_io.load_state()`가 UTF-8로 열어 `json.load` → `validate_state()` 검증 → `Quiz.from_dict()`로 객체 복원. **쓰기**: 퀴즈 추가·삭제 직후, 한 판이 끝난 직후(`finish_session`), 그리고 종료 시 `main()`의 `finally`에서 `save_state()` → `to_state()`로 딕셔너리 변환 → 임시 파일에 쓰고 `os.replace()`로 교체 |
-| Ctrl+C / EOF 안전 종료 | `input()`은 Ctrl+C에서 `KeyboardInterrupt`, 입력이 끝나면 `EOFError`를 낸다. 입력 함수는 이를 잡지 않고 바깥으로 보내(무한 재입력 방지), `main()`이 `except (EOFError, KeyboardInterrupt)`로 안내하고 `finally`에서 저장을 시도한다. 풀이 도중이면 `play()`가 그 판을 "중단"으로 기록한 뒤 다시 올려 보낸다. 저장 도중 Ctrl+C도 별도로 잡아 "저장 완료를 보장할 수 없음"을 알린다 |
-| 커밋 단위와 메시지 규칙 | 미션 기능 순서대로 **되돌리면 그 기능 하나만 빠지는 크기**로 나눴다(메뉴 → Quiz → 기본 데이터 → 브랜치에서 풀기 → 병합 → 추가 → 목록 → 점수 → 보너스 → 저장 → 수정 → 테스트 → 문서). 메시지는 `유형: 무엇을 했는지`이고 유형은 Feat·Fix·Test·Docs·Chore·Merge |
-
-### 항목 3. 핵심 기술 원리 적용
-
-- **클래스를 쓴 이유:** 함수만 쓰면 퀴즈 딕셔너리와 최고 점수를 전역 변수나 매개변수로 계속 넘겨야 하고, 정답 비교 같은 규칙이 여러 함수에 복사되기 쉽다. 클래스는 데이터(속성)와 그 데이터를 다루는 동작(메서드)을 묶어, `quiz.is_correct(2)`처럼 객체에게 일을 맡긴다. 생성자에서 값을 검사하므로 잘못된 퀴즈 객체가 만들어지지 않는다. 대신 작은 프로그램에서는 코드가 조금 길어진다.
-- **JSON을 쓴 이유와 특징:** 프로그램이 끝나면 메모리는 사라지므로 파일로 남겨야 한다. JSON은 사람이 읽을 수 있는 텍스트이고, 표준 라이브러리 `json`만으로 리스트·딕셔너리를 그대로 표현한다. 키는 큰따옴표 문자열이고 주석·마지막 쉼표를 허용하지 않는다. 사용자 정의 객체는 바로 저장되지 않아 `to_dict()` / `from_dict()`로 변환한다.
-- **파일 입출력에 try/except가 필요한 이유:** 파일은 프로그램 밖에 있어 코드가 맞아도 실패한다. 이 프로그램은 실패 원인별로 다르게 처리한다.
-
-  | 실패 상황 | 예외 | 처리 |
-  | --- | --- | --- |
-  | 첫 실행, 파일 없음 | `FileNotFoundError` | 기본 퀴즈 8개로 시작 |
-  | 문법이 깨진 JSON | `json.JSONDecodeError` | 원본을 `.bak`으로 백업한 뒤 기본값으로 복구 |
-  | UTF-8이 아닌 파일 | `UnicodeDecodeError` | 위와 동일 |
-  | 필드 누락·잘못된 값 | `ValueError` (검증) | 위와 동일 |
-  | 읽기 권한 없음 | `PermissionError`(`OSError`) | 손상으로 단정하지 않고, 원본 보호를 위해 이번 실행은 저장 안 함 |
-  | 쓰기 실패·디스크 부족 | `OSError` | "저장 실패, 변경은 메모리에만 있음" 안내, 종료 때 재시도 |
-
-- **브랜치와 병합:** `main`은 항상 실행 가능한 상태로 두고, 새 기능은 `feature/quiz-play`에서 만들었다. 실패해도 브랜치만 버리면 된다. 병합은 두 작업 흐름의 이력을 하나로 합치는 것이다. main에 새 커밋이 없으면 fast-forward로 흔적이 사라지므로 `--no-ff`로 병합 커밋을 남겨 그래프에서 보이게 했다.
-- **state.json 구조를 이렇게 설계한 이유:** 최상위를 객체로 두어 `quizzes`·`best_score`·`has_played`·`history`를 이름으로 구분한다. 그래서 히스토리를 나중에 추가해도 기존 키가 흔들리지 않았다. `quizzes`는 순서 있는 여러 개라 리스트이고, 각 원소는 Quiz 속성과 같은 키라 객체 ↔ 딕셔너리가 1:1로 대응한다. `answer`는 화면 번호와 같은 1\~4로 저장해 리스트 인덱스(0\~3)와 헷갈리지 않게 했다. `has_played`는 "아직 안 함"과 "했지만 0점"을 구분하고, `schema_version`은 구조가 바뀔 때 예전 파일을 변환할 근거가 된다.
-
-### 항목 4. 심층 인터뷰
-
-**① 퀴즈가 1000개 이상이 되면?** 현재 방식의 한계는 다음과 같다.
-
-- 퀴즈 하나를 추가해도 `save_state()`가 파일 전체를 다시 쓰고 `fsync`한다. 데이터가 클수록 저장마다 느려진다.
-- 시작할 때 전부 읽어 메모리에 올리고 모든 항목을 검증한다. 시작이 느려진다.
-- `history`는 판마다 계속 늘어나 퀴즈보다 먼저 커진다.
-- 주제별 검색, 틀린 문제만 같은 조회를 하려면 매번 전체를 훑어야 한다.
-- 파일이 하나라 한 곳이 깨지면 전체를 못 읽는다. 두 프로그램이 동시에 쓰면 나중에 쓴 쪽이 덮어쓴다.
-
-대안은 표준 라이브러리 `sqlite3`(행 단위 추가·수정, 검색, 트랜잭션), 기록은 한 줄씩 덧붙이는 JSON Lines, 퀴즈와 기록 파일 분리다. 다만 1000개 정도는 JSON으로도 충분히 빠르므로 바로 바꿀 필요는 없다.
-
-**② state.json이 손상되면?** 이미 구현한 대응은 다음과 같다.
-
-1. **예방:** 같은 폴더 임시 파일에 끝까지 쓰고 `flush`·`fsync` 후 `os.replace()`로 한 번에 교체한다. 저장 도중 멈춰도 반쯤 쓰인 파일이 남지 않는다.
-
-   > **flush와 fsync는 무엇인가?** 파일에 쓴 내용은 바로 디스크로 가지 않고 두 단계의 임시 저장소(버퍼)를 거친다.
-   >
-   > | 단계 | 쓴 내용이 머무는 곳 | 다음 단계로 보내는 명령 |
-   > | --- | --- | --- |
-   > | 1 | Python 프로그램 안의 버퍼. `write()`는 우선 여기에 모은다 | `stream.flush()`: 버퍼 내용을 운영체제에 넘긴다 |
-   > | 2 | 운영체제의 메모리(페이지 캐시). 다른 프로그램은 이미 읽을 수 있지만 아직 디스크에는 없을 수 있다 | `os.fsync(fd)`: 운영체제에게 디스크에 실제로 기록할 때까지 기다리게 한다 |
-   > | 3 | 디스크. 전원이 꺼져도 남는다 | 없음 |
-   >
-   > `flush`만 하면 프로그램이 죽어도 내용은 운영체제에 남지만, 그 직후 전원이 꺼지면 사라질 수 있다. `fsync`까지 해야 임시 파일이 디스크에 완성된 상태가 되고, 그다음 `os.replace()`가 같은 폴더 안에서 파일 이름을 한 번에 바꿔 원본과 교체한다. 그래서 `state.json`은 "예전 내용 전체" 아니면 "새 내용 전체" 중 하나로만 보이고, 반쯤 쓰인 상태가 되지 않는다. 코드 위치는 `state_io.save_state()`다.
-2. **백업 후 복구:** 파싱·인코딩·스키마 오류면 원본을 `state.json.corrupt-날짜시각.bak`으로 복사한 **다음에만** 기본값으로 실행한다. 백업에 실패하면 덮어쓰지 않도록 저장을 막는다. ([corrupt-recovery](docs/evidence/corrupt-recovery.txt))
-3. **원인 구분:** 권한 오류는 손상이 아니므로 백업·초기화하지 않고 원본을 그대로 둔다.
-
-더 할 수 있는 것: 저장할 때마다 직전 정상본을 남겨 손상 시 자동으로 되돌리기, 퀴즈 단위로 검증해 읽을 수 있는 문제만 살리기, 초기화 전에 "백업에서 복구 / 초기화 / 종료"를 사용자에게 묻기.
-
-**③ 채점 방식이나 선택지 개수가 바뀌면 어디부터 고치나?** 이번 보강으로 규칙을 한곳에 모았다.
-
-| 바뀌는 요구사항 | 먼저 고칠 곳 | 함께 확인할 곳 |
-| --- | --- | --- |
-| 점수 계산 (예: 정답 +3, 힌트 -2) | `scoring.py`의 `POINTS_PER_CORRECT`, `HINT_PENALTY`, `calculate_score()` | 안내 문구는 상수를 쓰므로 자동 반영. 단, `state_io._history_record()`가 저장된 기록의 점수를 같은 함수로 검증하므로, 예전 규칙의 기록이 손상으로 판정되지 않게 `schema_version`을 올리고 예전 기록은 예전 규칙으로 검증해야 한다. 기존 `best_score`를 유지할지 초기화할지도 정책으로 정한다 |
-| 선택지 개수 (예: 4개 → 5개) | `quiz.py`의 `CHOICE_COUNT` | Quiz 검증, `is_correct`, 정답 입력 범위, 추가 시 선택지 입력 반복은 상수를 따라 자동 반영. `defaults.py`의 기본 문제와 이미 저장된 `state.json`은 선택지가 4개라 새 구조로 변환하거나 문제를 보충해야 한다 |
-
-보강 전에는 `4`와 `* 2 - hints`가 `quiz.py`, `quiz_game.py`, `state_io.py` 여러 곳에 흩어져 있어 하나라도 빠뜨리면 동작이 어긋날 수 있었다. 지금은 `tests/test_scoring.py`가 상수와 검증 범위가 일치하는지 확인한다.
-
-### 항목 5. 보너스 문제 해결
-
-선택 보너스 5개를 모두 구현했다. 상세 규칙은 [3. 구현 기능과 점수 규칙](#features)에 있다.
-
-| 보너스 | 구현 | 확인 위치 |
-| --- | --- | --- |
-| 랜덤 출제 | `rng.sample()`로 중복 없이 뽑고 원본 순서는 유지 | [play](docs/evidence/play.txt), 고정 시드 테스트 |
-| 문제 수 선택 | 1\~현재 문제 수 범위로 `read_int` | [play](docs/evidence/play.txt) |
-| 힌트 | `h` 입력, 문제당 1회만 -1점, 힌트 없으면 차감 없음 | [play](docs/evidence/play.txt) |
-| 퀴즈 삭제 | 번호 선택 → 확인/취소 → 저장 | [delete](docs/evidence/delete.txt) |
-| 점수 히스토리 | 날짜·시각, 선택/실제 풀이 수, 정답·힌트·점수, 완료/중단 저장 | [history](docs/evidence/history.txt) |
-
-### 가장 어려웠던 지점: 가설 → 확인 → 조치
-
-커밋 기록과 코드 주석을 바탕으로 정리했다. 인터뷰 전에 본인 경험과 맞는지 다시 확인한다.
-
-| 문제 | 가설 | 확인 | 조치 |
-| --- | --- | --- | --- |
-| 종료 직전 저장 중에 Ctrl+C를 다시 누르면 Traceback으로 끝남 | `main()`의 `finally`에서 부르는 `save_state()` 안에서 난 `KeyboardInterrupt`는 바깥 `except`가 이미 지나가서 잡히지 않는다 | `KeyboardInterrupt`는 `Exception`의 하위가 아니라 `except (OSError, ValueError)`에 걸리지 않음을 확인 | `save_state()`에서 `KeyboardInterrupt`를 따로 잡아 "저장 완료를 보장할 수 없음"을 알리고 `False`를 반환 (커밋 `4be7486`), 저장 중 중단 테스트 추가 |
-| 처음 `git push`가 실패함 | 코드나 원격 주소가 아니라 HTTPS 인증 정보가 없다 | `git remote -v`의 원격 주소는 맞았고, 작업 환경에 GitHub 인증 정보가 없었음 | GitHub CLI로 로그인한 뒤 그 명령에만 gh 인증을 쓰도록 `tools/publish_and_practice.sh` 작성. 토큰은 출력하거나 파일에 쓰지 않음 |
-
-<a id="screenshots"></a>
-### 제출 스크린샷 (macOS 실제 화면, 2026-11-16)
-
-미션 제출물로 요구한 화면이다. 게임은 임시 복사본에서 실행해 프로젝트 `state.json`은 바뀌지 않았다. 촬영 방식은 [7. 캡처의 성격](#verification)에 있고, 메뉴·재시작·입력 오류 등 추가 화면도 7절에 있다.
-
-#### 개발 환경 (VSCode, Python 버전, Git 설정)
-
-![VSCode에서 프로젝트를 연 창과 python3·git 버전, user.name, 현재 브랜치를 확인한 Terminal](docs/screenshots/environment.png)
-
-#### 퀴즈 추가
-
-![문제, 선택지 4개, 정답 번호, 힌트를 입력해 퀴즈를 추가한 화면](docs/screenshots/add-quiz.png)
-
-#### 퀴즈 목록
-
-![등록된 퀴즈 9개 목록](docs/screenshots/list.png)
-
-#### 퀴즈 풀기 (문제 수 선택, 힌트, 정답/오답, 결과)
-
-![3문제를 골라 힌트를 쓰고 정답·오답 안내와 결과를 받은 화면](docs/screenshots/play.png)
-
-#### 점수 확인
-
-![최고 점수 확인 화면](docs/screenshots/score.png)
-
-#### `git log --oneline --graph --all`
-
-![브랜치 생성·병합과 clone/pull 실습 커밋이 보이는 Git 그래프](docs/screenshots/git-history.png)
+1. [프로젝트 개요와 주제](#overview)
+2. [실행과 메뉴](#run)
+3. [구현 기능과 점수 규칙](#features)
+4. [파일 구조와 객체의 책임](#structure)
+5. [데이터 파일과 복구 정책](#data)
+6. [Git 기록과 실습](#git-workflow)
+7. [실제 검증과 스크린샷](#verification)
+   - [제출 스크린샷](#screenshots)
+8. [평가 항목별 해결 정리](#evaluation)
+9. [과제 목표를 설명하기](#learning)
+10. [미션 조건 및 제출 현황](#submission)
 
 <a id="overview"></a>
 ## 1. 프로젝트 개요와 주제
@@ -296,8 +149,251 @@ E1-2/
 
 백업과 임시 파일, 로컬 `gh` 및 인증 설정 `.tools/`는 `.gitignore`로 제외한다. 상태 파일에는 비밀번호·개인정보를 넣지 않는다.
 
+<a id="git-workflow"></a>
+## 6. Git 기록과 실습
+
+로컬은 **최소 10개의 의미 있는 커밋** 조건을 충족한다. `main`과 `feature/quiz-play`를 모두 GitHub에 업로드했고, 2026-11-16 clone/pull 실습 후 원격 `main` 해시가 로컬과 같은 `4b00698`이다. 병합 기록은 main 그래프에도 남아 있다. 정확한 최신 수와 원격 차이는 `git rev-list --count HEAD`, `git status --short --branch`로 확인한다. Git 그래프 이미지는 캡처 시점의 기록이며, 캡처 파일 자체를 저장하는 후속 커밋은 이미지에 포함되지 않을 수 있다.
+
+- `main`: 필수·보너스 기능과 저장·복구 통합.
+- `feature/quiz-play`: 플레이 기능 구현 후 main에 병합. 추적 가능한 실습 기록으로 남김.
+- 실제 병합 커밋: `22018aa` (`Merge: 별도 브랜치의 퀴즈 플레이 기능 병합`).
+
+```bash
+git checkout -b feature/quiz-play
+# 실제 플레이 구현과 테스트 뒤 add / commit
+git checkout main
+git merge --no-ff feature/quiz-play -m "Merge: 별도 브랜치의 퀴즈 플레이 기능 병합"
+git log --oneline --graph --all
+```
+
+**첫 커밋에 대해:** 첫 커밋 `4f0d26a Initial commit`은 GitHub에서 저장소를 만들 때 생성되어 `.gitignore`·`.gitattributes`만 담고 있다. 이를 로컬로 받은 뒤 `README.md`(사전 질문·개발 계획)를 추가한 `3460531`이 로컬에서 만든 첫 커밋이고, 이후 커밋과 함께 push했다.
+
+위는 실제 수행한 흐름의 요약이다. 기능별 커밋은 메뉴, Quiz, 기본 데이터, 플레이, 추가, 목록, 점수, 보너스, 파일 저장, 안전 종료 등으로 나누었다. 빈 커밋으로 개수를 채우지 않았다. [실제 Git 로그](docs/evidence/git-history.txt)
+
+**clone/pull 실습 완료 (2026-11-16 13:28 KST):** 처음 HTTPS push는 작업 환경의 인증 부재로 실패했고, 이후 로그인된 Mac 터미널에서 `bash tools/publish_and_practice.sh`로 아래 순서를 실제 실행했다. 출력 전체는 [git-remote-practice](docs/evidence/git-remote-practice.txt)에 있다.
+
+1. 시작 전 `git pull --ff-only origin main`으로 동기화(이미 최신, `e221126`).
+2. `git push origin main feature/quiz-play`로 `feature/quiz-play`를 새 원격 브랜치로 올리고, 로컬·원격 main 일치(`e221126`) 확인.
+3. 별도 폴더에 `https://github.com/2dion/E1-2.git`을 clone.
+4. 복제 폴더에서 README에 "복제·동기화 실습 확인" 안내 추가 → commit `4b00698` → push(`e221126..4b00698`).
+5. 원본 폴더에서 `git pull --ff-only origin main`으로 fast-forward(`e221126..4b00698`) 후 `grep`으로 해당 줄 확인.
+6. 최종 로컬·원격 main 해시가 `4b006989b88208706f245fef11ac2105af15aa3a`로 일치했고, 로그 마지막 줄 `E1-2_REMOTE_PRACTICE_SUCCESS`를 확인.
+
+<a id="verification"></a>
+## 7. 실제 검증과 스크린샷
+
+```bash
+# 프로젝트 state.json을 바꾸지 않는 자동 테스트
+python3 -m unittest discover -s tests -v
+
+# 임시 복사본에서 실제 main.py를 실행해 로그 재생성
+python3 tools/capture_evidence.py
+```
+
+### 검증 결과
+
+- **90개 unittest 통과.** 모델 16개, 저장·검증 23개, 입력 7개, 게임 32개, 실행·문법 9개, 점수 규칙·선택지 수 3개. [Mac 테스트 출력](docs/evidence/tests.txt) · [Python 3.10 테스트 출력](docs/evidence/tests-python310.txt)
+- 점수 규칙과 선택지 수를 상수로 모은 뒤 `capture_evidence.py`로 12개 시나리오를 다시 돌려, 화면 출력이 캡처 시각과 랜덤 출제 순서 외에는 기존 로그와 같음을 확인했다.
+- **12개 실제 CLI 시나리오 통과.** 메뉴·추가·목록·랜덤/힌트·점수·히스토리·재시작·삭제·입력 오류·EOF·실제 SIGINT·손상 복구.
+- 실행 환경: **Python 3.14.4**, Git 2.55.0 (Mac, 2026-11-16 증거 재생성 기준). 미션 최소 버전인 **Python 3.10.20에서도 90개 테스트 전체가 통과**했다(2026-11-16, 클라우드 Linux 작업 환경). 모든 소스는 Python 3.10 문법 AST 검사도 통과한다.
+- 추가된 퀴즈 9개와 최고 5점을 다른 프로세스에서 다시 불러오는 것을 확인했다. 손상 파일의 백업과 기본 8개 복구도 확인했다.
+- 오류 테스트는 임시 폴더와 mock을 사용한다. 쓰기 실패는 실제 시스템 권한을 망가뜨리지 않고 PermissionError/OSError를 주입해 검증했다.
+- 실제 Ctrl+C 검증은 신호를 받기 전 메뉴 프롬프트를 확인하고 SIGINT를 전송했다. 유닛 테스트의 모의 예외와 구별한다.
+
+<a id="screenshots"></a>
+### 제출 스크린샷 (macOS 실제 화면, 2026-11-16)
+
+미션 제출물로 요구한 화면이다. 게임은 임시 복사본에서 실행해 프로젝트 `state.json`은 바뀌지 않았다.
+
+#### 개발 환경 (VSCode, Python 버전, Git 설정)
+
+![VSCode에서 프로젝트를 연 창과 python3·git 버전, user.name, 현재 브랜치를 확인한 Terminal](docs/screenshots/environment.png)
+
+#### 퀴즈 추가
+
+![문제, 선택지 4개, 정답 번호, 힌트를 입력해 퀴즈를 추가한 화면](docs/screenshots/add-quiz.png)
+
+#### 퀴즈 목록
+
+![등록된 퀴즈 9개 목록](docs/screenshots/list.png)
+
+#### 퀴즈 풀기 (문제 수 선택, 힌트, 정답/오답, 결과)
+
+![3문제를 골라 힌트를 쓰고 정답·오답 안내와 결과를 받은 화면](docs/screenshots/play.png)
+
+#### 점수 확인
+
+![최고 점수 확인 화면](docs/screenshots/score.png)
+
+#### `git log --oneline --graph --all`
+
+![브랜치 생성·병합과 clone/pull 실습 커밋이 보이는 Git 그래프](docs/screenshots/git-history.png)
+
+### 추가 화면
+
+메뉴·재시작·입력 오류는 실제 화면 캡처, 나머지는 실행 로그를 브라우저에 표시한 캡처다.
+
+#### 메뉴와 불러오기 안내 (실제 화면)
+
+![프로그램 시작 시 저장된 데이터를 불러왔다는 안내와 메뉴](docs/screenshots/menu.png)
+
+#### 재시작 후 데이터 유지 (실제 화면)
+
+![종료 후 다시 실행하자 퀴즈 9개와 최고 점수 3점을 불러온 화면](docs/screenshots/restart.png)
+
+#### 입력 오류 처리 (실제 화면)
+
+![메뉴에서 빈 입력, abc, 9를 입력했을 때의 안내](docs/screenshots/invalid-input.png)
+
+#### 점수 히스토리 (실행 로그 캡처)
+
+![완료·중단 판의 날짜와 점수 기록](docs/screenshots/history.png)
+
+#### 퀴즈 삭제 (실행 로그 캡처)
+
+![번호 선택 후 확인을 거쳐 퀴즈를 삭제한 화면](docs/screenshots/delete.png)
+
+#### EOF 안전 종료 (실행 로그 캡처)
+
+![입력 스트림이 끝났을 때 안내 후 저장하고 종료한 화면](docs/screenshots/eof.png)
+
+#### Ctrl+C 안전 종료 (실행 로그 캡처)
+
+![실제 SIGINT를 받았을 때 안내 후 저장하고 종료한 화면](docs/screenshots/ctrl-c.png)
+
+#### 손상 파일 복구 (실행 로그 캡처)
+
+![잘린 JSON을 감지해 원본을 백업하고 기본 퀴즈로 복구한 화면](docs/screenshots/corrupt-recovery.png)
+
+### 캡처의 성격
+
+`docs/screenshots/`의 이미지는 두 종류다.
+
+- **macOS 실제 화면 캡처 (2026-11-16)**: environment·menu·add-quiz·list·play·score·restart·invalid-input·git-history. macOS Terminal 창(Python 3.14.4)에서 직접 입력하며 실행한 화면을 그 창 영역만 `screencapture`로 찍었다. 게임 화면은 임시 복사본 폴더에서 실행해 프로젝트 `state.json`은 변경하지 않았다. environment.png는 이 프로젝트를 연 VSCode 창과, 같은 저장소에서 버전·Git 설정을 확인한 Terminal 창을 각각 실제로 캡처해 한 이미지에 나란히 붙인 것이다(macOS 스테이지 매니저 때문에 두 창을 한 화면에 함께 배치하지 못함). git-history.png는 실제 저장소에서 `git log --oneline --graph --all`을 실행한 화면이다.
+- **실제 실행 로그의 브라우저 표시 캡처**: history·delete·eof·ctrl-c·corrupt-recovery. `tools/capture_evidence.py`가 기록한 실제 출력 로그를 UTF-8로 브라우저에 표시해 찍었다. 입력 순서는 로그 상단에 따로 기록했다.
+
+증거 재현에서만 원본 퀴즈의 정답 선택지를 2번 위치로 옮긴 **임시 테스트 데이터**를 사용해, 랜덤 순서와 무관하게 3개 정답·힌트 1회·5점을 검증한다. 원래 기본 문제의 내용·정답 의미와 프로젝트 `state.json`은 바꾸지 않는다. 로그 재생성 명령은 PNG를 자동 재촬영하지 않는다. macOS 실제 화면 캡처의 플레이는 이 재배치 없이 기본 문제 그대로 진행했다(3문제 중 2개 정답, 힌트 1회, 3점, 오답 안내 포함).
+
+<a id="evaluation"></a>
+## 8. 평가 항목별 해결 정리 (평가자용 요약)
+
+평가 문항 1\~5를 순서대로 따라가며 **무엇을 어떻게 해결했고, 어디서 확인하는지**를 한곳에 모았다. 각 행의 링크는 실제 실행 로그나 코드 위치다. 세부 개념 설명은 [9. 과제 목표를 설명하기](#learning)에 있다.
+
+### 바로 확인하는 명령
+
+```bash
+git clone https://github.com/2dion/E1-2.git
+cd E1-2
+python3 --version                           # 3.10 이상
+python3 -m unittest discover -s tests -v    # 90개 테스트, 프로젝트 state.json을 바꾸지 않음
+python3 tools/capture_evidence.py           # 임시 복사본에서 실제 CLI 시나리오 12개 재현
+python3 main.py                             # 직접 플레이
+git log --oneline --graph --all             # 커밋·브랜치·병합 기록
+```
+
+### 항목 1. 기능 동작 검증
+
+| 평가 문항 | 해결 방법 | 확인 위치 |
+| --- | --- | --- |
+| 메뉴 표시, 풀기·추가·목록·점수 확인 동작 | `QuizGame.run()`이 메뉴 번호마다 메서드 하나(`play`, `add_quiz`, `list_quizzes`, `show_score`)를 호출. 보너스로 삭제·히스토리 메뉴 추가 | [menu](docs/evidence/menu.txt) · [play](docs/evidence/play.txt) · [add-quiz](docs/evidence/add-quiz.txt) · [list](docs/evidence/list.txt) · [score](docs/evidence/score.txt) |
+| 정답/오답 판정 | 게임은 비교하지 않고 `quiz.is_correct(selected)`로 Quiz에게 요청. 오답이면 정답 번호를 알려 줌 | [play](docs/evidence/play.txt), `tests/test_quiz.py` |
+| 입력 오류 4가지: 공백, 문자, 범위 밖, 빈 입력 | `input_utils.read_int()`가 ① `strip()`으로 공백 제거 → ② 빈 값 안내 → ③ `int()` 실패(ValueError) 안내 → ④ 범위 검사 순서로 처리하고 다시 입력받음. 정답 입력(`ask_answer`)도 같은 순서 | [invalid-input](docs/evidence/invalid-input.txt) (입력 `\n`, `abc`, `9`, ` 0 `), `tests/test_input_utils.py` |
+| 재실행 후 추가 퀴즈·최고 점수 유지 | 추가·점수 갱신 직후 `state.json`에 UTF-8로 저장하고, 시작할 때 `load_state()`로 복원. 복원에 성공하면 첫 화면에 "저장된 데이터를 불러왔습니다. (퀴즈 N개, 최고 점수 M점)"을 출력 | [restart](docs/evidence/restart.txt): 별도 프로세스에서 퀴즈 9개, 최고 5점 확인 |
+| 기본 퀴즈 5개 이상 | `defaults.py`에 Python·개발 기초 문제 8개, 각각 선택지 4개·정답·힌트 | `defaults.py`, `state.json` |
+| GitHub 업로드, 의미 있는 커밋 10개 이상 | 기능 단위 커밋 16개(이 보강 이전 기준, 빈 커밋 없음). 2026-11-16 실습 스크립트가 `main`과 `feature/quiz-play`를 모두 원격에 push했고, 실습 후 원격 `main`이 로컬과 같은 `4b00698`임을 `git ls-remote`로 확인 | [git-history](docs/evidence/git-history.txt), GitHub 커밋 목록 |
+| 브랜치 생성·병합이 `git log --oneline --graph`에 보임 | `feature/quiz-play`에서 퀴즈 풀기를 구현하고 `--no-ff`로 병합해 병합 커밋 `22018aa`를 남김 | [git-history](docs/evidence/git-history.txt), [그래프 캡처](#screenshots) |
+| clone과 pull 실습 흔적 | 별도 폴더에 clone → README 한 줄 추가 → commit → push → 원본 폴더에서 `git pull --ff-only` → 로컬·원격 main 해시 일치 확인을 `tools/publish_and_practice.sh`로 실제 실행 | [git-remote-practice](docs/evidence/git-remote-practice.txt), 복제본 커밋 `4b00698` |
+
+### 항목 2. 코드 구조 및 설계
+
+| 평가 문항 | 설계와 근거 |
+| --- | --- |
+| Quiz와 QuizGame의 책임 | **Quiz**(`quiz.py`)는 문제 하나: 질문·선택지·정답·힌트를 검증해 보관하고 `display()`, `is_correct()`를 맡는다. **QuizGame**(`quiz_game.py`)은 게임 전체: 퀴즈 목록·최고 점수·기록을 갖고 메뉴·진행·추가·목록·점수·저장 시점을 조율한다. 판정 규칙은 Quiz 한곳에만 있다 |
+| 입력 / 게임 진행 / 저장 분리 기준 | 기준은 **"바뀌는 이유가 다르면 다른 파일"**. 입력 규칙은 `input_utils.py`(메뉴·문제 수·정답 번호에서 재사용), 게임 규칙은 `quiz_game.py`, 파일 형식·검증·원자적 저장은 `state_io.py`, 점수 규칙은 `scoring.py`, 시작·종료 조율은 `main.py` |
+| state.json 읽기/쓰기 흐름 | **읽기**: `main()` → `QuizGame()` 생성 → `load_state()` → `state_io.load_state()`가 UTF-8로 열어 `json.load` → `validate_state()` 검증 → `Quiz.from_dict()`로 객체 복원. **쓰기**: 퀴즈 추가·삭제 직후, 한 판이 끝난 직후(`finish_session`), 그리고 종료 시 `main()`의 `finally`에서 `save_state()` → `to_state()`로 딕셔너리 변환 → 임시 파일에 쓰고 `os.replace()`로 교체 |
+| Ctrl+C / EOF 안전 종료 | `input()`은 Ctrl+C에서 `KeyboardInterrupt`, 입력이 끝나면 `EOFError`를 낸다. 입력 함수는 이를 잡지 않고 바깥으로 보내(무한 재입력 방지), `main()`이 `except (EOFError, KeyboardInterrupt)`로 안내하고 `finally`에서 저장을 시도한다. 풀이 도중이면 `play()`가 그 판을 "중단"으로 기록한 뒤 다시 올려 보낸다. 저장 도중 Ctrl+C도 별도로 잡아 "저장 완료를 보장할 수 없음"을 알린다 |
+| 커밋 단위와 메시지 규칙 | 미션 기능 순서대로 **되돌리면 그 기능 하나만 빠지는 크기**로 나눴다(메뉴 → Quiz → 기본 데이터 → 브랜치에서 풀기 → 병합 → 추가 → 목록 → 점수 → 보너스 → 저장 → 수정 → 테스트 → 문서). 메시지는 `유형: 무엇을 했는지`이고 유형은 Feat·Fix·Test·Docs·Chore·Merge |
+
+### 항목 3. 핵심 기술 원리 적용
+
+- **클래스를 쓴 이유:** 함수만 쓰면 퀴즈 딕셔너리와 최고 점수를 전역 변수나 매개변수로 계속 넘겨야 하고, 정답 비교 같은 규칙이 여러 함수에 복사되기 쉽다. 클래스는 데이터(속성)와 그 데이터를 다루는 동작(메서드)을 묶어, `quiz.is_correct(2)`처럼 객체에게 일을 맡긴다. 생성자에서 값을 검사하므로 잘못된 퀴즈 객체가 만들어지지 않는다. 대신 작은 프로그램에서는 코드가 조금 길어진다.
+- **JSON을 쓴 이유와 특징:** 프로그램이 끝나면 메모리는 사라지므로 파일로 남겨야 한다. JSON은 사람이 읽을 수 있는 텍스트이고, 표준 라이브러리 `json`만으로 리스트·딕셔너리를 그대로 표현한다. 키는 큰따옴표 문자열이고 주석·마지막 쉼표를 허용하지 않는다. 사용자 정의 객체는 바로 저장되지 않아 `to_dict()` / `from_dict()`로 변환한다.
+- **파일 입출력에 try/except가 필요한 이유:** 파일은 프로그램 밖에 있어 코드가 맞아도 실패한다. 이 프로그램은 실패 원인별로 다르게 처리한다.
+
+  | 실패 상황 | 예외 | 처리 |
+  | --- | --- | --- |
+  | 첫 실행, 파일 없음 | `FileNotFoundError` | 기본 퀴즈 8개로 시작 |
+  | 문법이 깨진 JSON | `json.JSONDecodeError` | 원본을 `.bak`으로 백업한 뒤 기본값으로 복구 |
+  | UTF-8이 아닌 파일 | `UnicodeDecodeError` | 위와 동일 |
+  | 필드 누락·잘못된 값 | `ValueError` (검증) | 위와 동일 |
+  | 읽기 권한 없음 | `PermissionError`(`OSError`) | 손상으로 단정하지 않고, 원본 보호를 위해 이번 실행은 저장 안 함 |
+  | 쓰기 실패·디스크 부족 | `OSError` | "저장 실패, 변경은 메모리에만 있음" 안내, 종료 때 재시도 |
+
+- **브랜치와 병합:** `main`은 항상 실행 가능한 상태로 두고, 새 기능은 `feature/quiz-play`에서 만들었다. 실패해도 브랜치만 버리면 된다. 병합은 두 작업 흐름의 이력을 하나로 합치는 것이다. main에 새 커밋이 없으면 fast-forward로 흔적이 사라지므로 `--no-ff`로 병합 커밋을 남겨 그래프에서 보이게 했다.
+- **state.json 구조를 이렇게 설계한 이유:** 최상위를 객체로 두어 `quizzes`·`best_score`·`has_played`·`history`를 이름으로 구분한다. 그래서 히스토리를 나중에 추가해도 기존 키가 흔들리지 않았다. `quizzes`는 순서 있는 여러 개라 리스트이고, 각 원소는 Quiz 속성과 같은 키라 객체 ↔ 딕셔너리가 1:1로 대응한다. `answer`는 화면 번호와 같은 1\~4로 저장해 리스트 인덱스(0\~3)와 헷갈리지 않게 했다. `has_played`는 "아직 안 함"과 "했지만 0점"을 구분하고, `schema_version`은 구조가 바뀔 때 예전 파일을 변환할 근거가 된다.
+
+### 항목 4. 심층 인터뷰
+
+**① 퀴즈가 1000개 이상이 되면?** 현재 방식의 한계는 다음과 같다.
+
+- 퀴즈 하나를 추가해도 `save_state()`가 파일 전체를 다시 쓰고 `fsync`한다. 데이터가 클수록 저장마다 느려진다.
+- 시작할 때 전부 읽어 메모리에 올리고 모든 항목을 검증한다. 시작이 느려진다.
+- `history`는 판마다 계속 늘어나 퀴즈보다 먼저 커진다.
+- 주제별 검색, 틀린 문제만 같은 조회를 하려면 매번 전체를 훑어야 한다.
+- 파일이 하나라 한 곳이 깨지면 전체를 못 읽는다. 두 프로그램이 동시에 쓰면 나중에 쓴 쪽이 덮어쓴다.
+
+대안은 표준 라이브러리 `sqlite3`(행 단위 추가·수정, 검색, 트랜잭션), 기록은 한 줄씩 덧붙이는 JSON Lines, 퀴즈와 기록 파일 분리다. 다만 1000개 정도는 JSON으로도 충분히 빠르므로 바로 바꿀 필요는 없다.
+
+**② state.json이 손상되면?** 이미 구현한 대응은 다음과 같다.
+
+1. **예방:** 같은 폴더 임시 파일에 끝까지 쓰고 `flush`·`fsync` 후 `os.replace()`로 한 번에 교체한다. 저장 도중 멈춰도 반쯤 쓰인 파일이 남지 않는다.
+
+   > **flush와 fsync는 무엇인가?** 파일에 쓴 내용은 바로 디스크로 가지 않고 두 단계의 임시 저장소(버퍼)를 거친다.
+   >
+   > | 단계 | 쓴 내용이 머무는 곳 | 다음 단계로 보내는 명령 |
+   > | --- | --- | --- |
+   > | 1 | Python 프로그램 안의 버퍼. `write()`는 우선 여기에 모은다 | `stream.flush()`: 버퍼 내용을 운영체제에 넘긴다 |
+   > | 2 | 운영체제의 메모리(페이지 캐시). 다른 프로그램은 이미 읽을 수 있지만 아직 디스크에는 없을 수 있다 | `os.fsync(fd)`: 운영체제에게 디스크에 실제로 기록할 때까지 기다리게 한다 |
+   > | 3 | 디스크. 전원이 꺼져도 남는다 | 없음 |
+   >
+   > `flush`만 하면 프로그램이 죽어도 내용은 운영체제에 남지만, 그 직후 전원이 꺼지면 사라질 수 있다. `fsync`까지 해야 임시 파일이 디스크에 완성된 상태가 되고, 그다음 `os.replace()`가 같은 폴더 안에서 파일 이름을 한 번에 바꿔 원본과 교체한다. 그래서 `state.json`은 "예전 내용 전체" 아니면 "새 내용 전체" 중 하나로만 보이고, 반쯤 쓰인 상태가 되지 않는다. 코드 위치는 `state_io.save_state()`다.
+2. **백업 후 복구:** 파싱·인코딩·스키마 오류면 원본을 `state.json.corrupt-날짜시각.bak`으로 복사한 **다음에만** 기본값으로 실행한다. 백업에 실패하면 덮어쓰지 않도록 저장을 막는다. ([corrupt-recovery](docs/evidence/corrupt-recovery.txt))
+3. **원인 구분:** 권한 오류는 손상이 아니므로 백업·초기화하지 않고 원본을 그대로 둔다.
+
+더 할 수 있는 것: 저장할 때마다 직전 정상본을 남겨 손상 시 자동으로 되돌리기, 퀴즈 단위로 검증해 읽을 수 있는 문제만 살리기, 초기화 전에 "백업에서 복구 / 초기화 / 종료"를 사용자에게 묻기.
+
+**③ 채점 방식이나 선택지 개수가 바뀌면 어디부터 고치나?** 이번 보강으로 규칙을 한곳에 모았다.
+
+| 바뀌는 요구사항 | 먼저 고칠 곳 | 함께 확인할 곳 |
+| --- | --- | --- |
+| 점수 계산 (예: 정답 +3, 힌트 -2) | `scoring.py`의 `POINTS_PER_CORRECT`, `HINT_PENALTY`, `calculate_score()` | 안내 문구는 상수를 쓰므로 자동 반영. 단, `state_io._history_record()`가 저장된 기록의 점수를 같은 함수로 검증하므로, 예전 규칙의 기록이 손상으로 판정되지 않게 `schema_version`을 올리고 예전 기록은 예전 규칙으로 검증해야 한다. 기존 `best_score`를 유지할지 초기화할지도 정책으로 정한다 |
+| 선택지 개수 (예: 4개 → 5개) | `quiz.py`의 `CHOICE_COUNT` | Quiz 검증, `is_correct`, 정답 입력 범위, 추가 시 선택지 입력 반복은 상수를 따라 자동 반영. `defaults.py`의 기본 문제와 이미 저장된 `state.json`은 선택지가 4개라 새 구조로 변환하거나 문제를 보충해야 한다 |
+
+보강 전에는 `4`와 `* 2 - hints`가 `quiz.py`, `quiz_game.py`, `state_io.py` 여러 곳에 흩어져 있어 하나라도 빠뜨리면 동작이 어긋날 수 있었다. 지금은 `tests/test_scoring.py`가 상수와 검증 범위가 일치하는지 확인한다.
+
+### 항목 5. 보너스 문제 해결
+
+선택 보너스 5개를 모두 구현했다. 상세 규칙은 [3. 구현 기능과 점수 규칙](#features)에 있다.
+
+| 보너스 | 구현 | 확인 위치 |
+| --- | --- | --- |
+| 랜덤 출제 | `rng.sample()`로 중복 없이 뽑고 원본 순서는 유지 | [play](docs/evidence/play.txt), 고정 시드 테스트 |
+| 문제 수 선택 | 1\~현재 문제 수 범위로 `read_int` | [play](docs/evidence/play.txt) |
+| 힌트 | `h` 입력, 문제당 1회만 -1점, 힌트 없으면 차감 없음 | [play](docs/evidence/play.txt) |
+| 퀴즈 삭제 | 번호 선택 → 확인/취소 → 저장 | [delete](docs/evidence/delete.txt) |
+| 점수 히스토리 | 날짜·시각, 선택/실제 풀이 수, 정답·힌트·점수, 완료/중단 저장 | [history](docs/evidence/history.txt) |
+
+### 가장 어려웠던 지점: 가설 → 확인 → 조치
+
+커밋 기록과 코드 주석을 바탕으로 정리했다. 인터뷰 전에 본인 경험과 맞는지 다시 확인한다.
+
+| 문제 | 가설 | 확인 | 조치 |
+| --- | --- | --- | --- |
+| 종료 직전 저장 중에 Ctrl+C를 다시 누르면 Traceback으로 끝남 | `main()`의 `finally`에서 부르는 `save_state()` 안에서 난 `KeyboardInterrupt`는 바깥 `except`가 이미 지나가서 잡히지 않는다 | `KeyboardInterrupt`는 `Exception`의 하위가 아니라 `except (OSError, ValueError)`에 걸리지 않음을 확인 | `save_state()`에서 `KeyboardInterrupt`를 따로 잡아 "저장 완료를 보장할 수 없음"을 알리고 `False`를 반환 (커밋 `4be7486`), 저장 중 중단 테스트 추가 |
+| 처음 `git push`가 실패함 | 코드나 원격 주소가 아니라 HTTPS 인증 정보가 없다 | `git remote -v`의 원격 주소는 맞았고, 작업 환경에 GitHub 인증 정보가 없었음 | GitHub CLI로 로그인한 뒤 그 명령에만 gh 인증을 쓰도록 `tools/publish_and_practice.sh` 작성. 토큰은 출력하거나 파일에 쓰지 않음 |
+
 <a id="learning"></a>
-## 6. 과제 목표를 설명하기
+## 9. 과제 목표를 설명하기
 
 아래는 외워야 할 답안 목록이 아니라 **코드를 가리키며 설명할 수 있도록 만든 학습 안내**다. 아직 설명이 어렵다면 사전 질문 문서와 해당 함수를 함께 읽는다.
 
@@ -357,102 +453,8 @@ E1-2/
 
 기본 random은 내부 상태를 알고리즘으로 바꾸는 의사 난수다. 게임은 매 실행의 기본 시드를 사용하고 테스트는 `random.Random(고정값)`을 전달해 재현한다. `sample`은 중복 없는 새 목록을 만들고 원본은 보존한다. 보안 토큰을 만드는 용도로 사용하지 않는다.
 
-<a id="verification"></a>
-## 7. 실제 검증과 스크린샷
-
-```bash
-# 프로젝트 state.json을 바꾸지 않는 자동 테스트
-python3 -m unittest discover -s tests -v
-
-# 임시 복사본에서 실제 main.py를 실행해 로그 재생성
-python3 tools/capture_evidence.py
-```
-
-### 검증 결과
-
-- **90개 unittest 통과.** 모델 16개, 저장·검증 23개, 입력 7개, 게임 32개, 실행·문법 9개, 점수 규칙·선택지 수 3개. [Mac 테스트 출력](docs/evidence/tests.txt) · [Python 3.10 테스트 출력](docs/evidence/tests-python310.txt)
-- 점수 규칙과 선택지 수를 상수로 모은 뒤 `capture_evidence.py`로 12개 시나리오를 다시 돌려, 화면 출력이 캡처 시각과 랜덤 출제 순서 외에는 기존 로그와 같음을 확인했다.
-- **12개 실제 CLI 시나리오 통과.** 메뉴·추가·목록·랜덤/힌트·점수·히스토리·재시작·삭제·입력 오류·EOF·실제 SIGINT·손상 복구.
-- 실행 환경: **Python 3.14.4**, Git 2.55.0 (Mac, 2026-11-16 증거 재생성 기준). 미션 최소 버전인 **Python 3.10.20에서도 90개 테스트 전체가 통과**했다(2026-11-16, 클라우드 Linux 작업 환경). 모든 소스는 Python 3.10 문법 AST 검사도 통과한다.
-- 추가된 퀴즈 9개와 최고 5점을 다른 프로세스에서 다시 불러오는 것을 확인했다. 손상 파일의 백업과 기본 8개 복구도 확인했다.
-- 오류 테스트는 임시 폴더와 mock을 사용한다. 쓰기 실패는 실제 시스템 권한을 망가뜨리지 않고 PermissionError/OSError를 주입해 검증했다.
-- 실제 Ctrl+C 검증은 신호를 받기 전 메뉴 프롬프트를 확인하고 SIGINT를 전송했다. 유닛 테스트의 모의 예외와 구별한다.
-
-### 캡처의 성격
-
-`docs/screenshots/`의 이미지는 두 종류다.
-
-- **macOS 실제 화면 캡처 (2026-11-16)**: environment·menu·add-quiz·list·play·score·restart·invalid-input·git-history. macOS Terminal 창(Python 3.14.4)에서 직접 입력하며 실행한 화면을 그 창 영역만 `screencapture`로 찍었다. 게임 화면은 임시 복사본 폴더에서 실행해 프로젝트 `state.json`은 변경하지 않았다. environment.png는 이 프로젝트를 연 VSCode 창과, 같은 저장소에서 버전·Git 설정을 확인한 Terminal 창을 각각 실제로 캡처해 한 이미지에 나란히 붙인 것이다(macOS 스테이지 매니저 때문에 두 창을 한 화면에 함께 배치하지 못함). git-history.png는 실제 저장소에서 `git log --oneline --graph --all`을 실행한 화면이다.
-- **실제 실행 로그의 브라우저 표시 캡처**: history·delete·eof·ctrl-c·corrupt-recovery. `tools/capture_evidence.py`가 기록한 실제 출력 로그를 UTF-8로 브라우저에 표시해 찍었다. 입력 순서는 로그 상단에 따로 기록했다.
-
-증거 재현에서만 원본 퀴즈의 정답 선택지를 2번 위치로 옮긴 **임시 테스트 데이터**를 사용해, 랜덤 순서와 무관하게 3개 정답·힌트 1회·5점을 검증한다. 원래 기본 문제의 내용·정답 의미와 프로젝트 `state.json`은 바꾸지 않는다. 로그 재생성 명령은 PNG를 자동 재촬영하지 않는다. macOS 실제 화면 캡처의 플레이는 이 재배치 없이 기본 문제 그대로 진행했다(3문제 중 2개 정답, 힌트 1회, 3점, 오답 안내 포함).
-
-아래는 미션 제출물 외의 추가 캡처다. 미션이 요구한 개발 환경·추가·목록·플레이·점수·Git 그래프 화면은 [0. 평가 항목별 해결 정리](#screenshots)에 바로 보이게 넣었다.
-
-#### 메뉴와 불러오기 안내 (실제 화면)
-
-![프로그램 시작 시 저장된 데이터를 불러왔다는 안내와 메뉴](docs/screenshots/menu.png)
-
-#### 재시작 후 데이터 유지 (실제 화면)
-
-![종료 후 다시 실행하자 퀴즈 9개와 최고 점수 3점을 불러온 화면](docs/screenshots/restart.png)
-
-#### 입력 오류 처리 (실제 화면)
-
-![메뉴에서 빈 입력, abc, 9를 입력했을 때의 안내](docs/screenshots/invalid-input.png)
-
-#### 점수 히스토리 (실행 로그 캡처)
-
-![완료·중단 판의 날짜와 점수 기록](docs/screenshots/history.png)
-
-#### 퀴즈 삭제 (실행 로그 캡처)
-
-![번호 선택 후 확인을 거쳐 퀴즈를 삭제한 화면](docs/screenshots/delete.png)
-
-#### EOF 안전 종료 (실행 로그 캡처)
-
-![입력 스트림이 끝났을 때 안내 후 저장하고 종료한 화면](docs/screenshots/eof.png)
-
-#### Ctrl+C 안전 종료 (실행 로그 캡처)
-
-![실제 SIGINT를 받았을 때 안내 후 저장하고 종료한 화면](docs/screenshots/ctrl-c.png)
-
-#### 손상 파일 복구 (실행 로그 캡처)
-
-![잘린 JSON을 감지해 원본을 백업하고 기본 퀴즈로 복구한 화면](docs/screenshots/corrupt-recovery.png)
-
-<a id="git-workflow"></a>
-## 8. Git 기록과 실습
-
-로컬은 **최소 10개의 의미 있는 커밋** 조건을 충족한다. `main`과 `feature/quiz-play`를 모두 GitHub에 업로드했고, 2026-11-16 clone/pull 실습 후 원격 `main` 해시가 로컬과 같은 `4b00698`이다. 병합 기록은 main 그래프에도 남아 있다. 정확한 최신 수와 원격 차이는 `git rev-list --count HEAD`, `git status --short --branch`로 확인한다. Git 그래프 이미지는 캡처 시점의 기록이며, 캡처 파일 자체를 저장하는 후속 커밋은 이미지에 포함되지 않을 수 있다.
-
-- `main`: 필수·보너스 기능과 저장·복구 통합.
-- `feature/quiz-play`: 플레이 기능 구현 후 main에 병합. 추적 가능한 실습 기록으로 남김.
-- 실제 병합 커밋: `22018aa` (`Merge: 별도 브랜치의 퀴즈 플레이 기능 병합`).
-
-```bash
-git checkout -b feature/quiz-play
-# 실제 플레이 구현과 테스트 뒤 add / commit
-git checkout main
-git merge --no-ff feature/quiz-play -m "Merge: 별도 브랜치의 퀴즈 플레이 기능 병합"
-git log --oneline --graph --all
-```
-
-**첫 커밋에 대해:** 첫 커밋 `4f0d26a Initial commit`은 GitHub에서 저장소를 만들 때 생성되어 `.gitignore`·`.gitattributes`만 담고 있다. 이를 로컬로 받은 뒤 `README.md`(사전 질문·개발 계획)를 추가한 `3460531`이 로컬에서 만든 첫 커밋이고, 이후 커밋과 함께 push했다.
-
-위는 실제 수행한 흐름의 요약이다. 기능별 커밋은 메뉴, Quiz, 기본 데이터, 플레이, 추가, 목록, 점수, 보너스, 파일 저장, 안전 종료 등으로 나누었다. 빈 커밋으로 개수를 채우지 않았다. [실제 Git 로그](docs/evidence/git-history.txt)
-
-**clone/pull 실습 완료 (2026-11-16 13:28 KST):** 처음 HTTPS push는 작업 환경의 인증 부재로 실패했고, 이후 로그인된 Mac 터미널에서 `bash tools/publish_and_practice.sh`로 아래 순서를 실제 실행했다. 출력 전체는 [git-remote-practice](docs/evidence/git-remote-practice.txt)에 있다.
-
-1. 시작 전 `git pull --ff-only origin main`으로 동기화(이미 최신, `e221126`).
-2. `git push origin main feature/quiz-play`로 `feature/quiz-play`를 새 원격 브랜치로 올리고, 로컬·원격 main 일치(`e221126`) 확인.
-3. 별도 폴더에 `https://github.com/2dion/E1-2.git`을 clone.
-4. 복제 폴더에서 README에 "복제·동기화 실습 확인" 안내 추가 → commit `4b00698` → push(`e221126..4b00698`).
-5. 원본 폴더에서 `git pull --ff-only origin main`으로 fast-forward(`e221126..4b00698`) 후 `grep`으로 해당 줄 확인.
-6. 최종 로컬·원격 main 해시가 `4b006989b88208706f245fef11ac2105af15aa3a`로 일치했고, 로그 마지막 줄 `E1-2_REMOTE_PRACTICE_SUCCESS`를 확인.
-
 <a id="submission"></a>
-## 9. 미션 조건 및 제출 현황
+## 10. 미션 조건 및 제출 현황
 
 - [x] 동작하는 콘솔 게임과 기본 퀴즈 8개
 - [x] 최소 2개 클래스, 기능별 메서드, 읽기 쉬운 한국어 주석
