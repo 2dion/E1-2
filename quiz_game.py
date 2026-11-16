@@ -230,6 +230,9 @@ class QuizGame:
             self.has_played = state["has_played"]
             self.history = state["history"]
             self.dirty = False
+            # 재실행 후 데이터가 유지됐는지 첫 화면에서 바로 확인할 수 있게 한다.
+            played = f"최고 점수 {self.best_score}점" if self.has_played else "아직 완료한 판 없음"
+            print(f"저장된 데이터를 불러왔습니다. (퀴즈 {len(self.quizzes)}개, {played})")
 
     def save_state(self) -> bool:
         """변경이 있으면 원자적으로 저장하고 성공 여부를 정직하게 알린다."""

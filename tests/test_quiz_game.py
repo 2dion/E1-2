@@ -96,6 +96,17 @@ class QuizGameTests(unittest.TestCase):
         self.assertTrue(game.save_state())
         self.assertEqual(load_state(self.state_path), game.to_state())
 
+    def test_restart_announces_loaded_quiz_count_and_best_score(self):
+        """정상 파일을 불러오면 퀴즈 수와 최고 점수(또는 미플레이)를 안내한다."""
+        self.seed(3)
+        self.new_game()
+        self.assertIn("저장된 데이터를 불러왔습니다. (퀴즈 3개, 아직 완료한 판 없음)", self.output.getvalue())
+        self.clear_output()
+        self.game.best_score, self.game.has_played, self.game.dirty = 5, True, True
+        self.assertTrue(self.game.save_state())
+        self.new_game()
+        self.assertIn("(퀴즈 3개, 최고 점수 5점)", self.output.getvalue())
+
     def test_add_valid_persists_and_restarts(self):
         """모든 항목을 받은 문제는 정리한 값으로 저장하고 재시작해 복원한다."""
         self.seed()
