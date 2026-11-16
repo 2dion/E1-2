@@ -1,11 +1,24 @@
 E1-2 Git 실습: 실제 실행 결과
+캡처 시각: 2026-11-16T13:49:05+0900 (macOS, 이 커밋 직전 상태)
 
 $ git init
-Reinitialized existing Git repository in /Users/leedongin/Documents/Codyssey/AllInOne/temp/E1-2/.git/
-
-기존 저장소 재초기화이며 원격/이력을 새로 만들지 않음
+(최초 설정 때 기록. 이번 갱신에서는 git init을 다시 실행하지 않음)
 
 $ git log --oneline --graph --all
+*   6e22502 Merge: 시작 시 불러오기 안내와 Python 3.10 확인 병합 (#2)
+|\  
+| * 3aca7a1 Feat: 시작 시 불러온 퀴즈 수와 최고 점수 안내 및 Python 3.10 실행 확인
+|/  
+* 7a6278d Docs: 원격 clone·push·pull 실습 실제 결과와 증거 추가
+* 4b00698 Docs: 원격 복제본에서 동기화 실습 안내 추가
+*   e221126 Merge: 평가 항목 기준 보강과 README 항목별 정리 병합 (#1)
+|\  
+| * 489041c Docs: 평가 항목 1~5별 해결 방법과 증거를 README에 정리
+| * 15388d3 Refactor: 점수 규칙과 선택지 수를 한곳에 모아 요구사항 변경 범위 축소
+|/  
+* 0b19634 Chore: gh 보안 인증을 사용하는 원격 업로드와 복제 실습 절차 추가
+* fdfdfaa Docs: 과제 목표 설명과 요구사항 대응 및 실제 실행 증거 정리
+* 2ca3caa Test: 게임과 입력 및 CLI 실행의 회귀 테스트 47개 추가
 * 4be7486 Fix: 저장 중 중단 처리 보강과 실제 CLI 재현 도구 및 초기 상태 추가
 * 7257dd4 Feat: UTF-8 JSON 원자적 저장과 손상 백업 및 안전 종료 구현
 * 881a22a Feat: 랜덤 출제와 문제 수 선택 및 힌트 삭제 히스토리 구현
@@ -23,10 +36,12 @@ $ git log --oneline --graph --all
 * 4f0d26a Initial commit
 
 $ git rev-list --count HEAD
-13
+23
 
 $ git branch -a
   feature/quiz-play
 * main
   remotes/origin/HEAD -> origin/main
+  remotes/origin/claude/project-thread-w4y9ba
+  remotes/origin/feature/quiz-play
   remotes/origin/main

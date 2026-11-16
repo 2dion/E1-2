@@ -114,6 +114,8 @@ test_read_permission_error_patches_imported_target_and_blocks_save (test_quiz_ga
 실제 호출 대상 별칭에 읽기 권한 오류를 주입하여 잘못된 복구를 막는다. ... ok
 test_repeated_hint_deducts_once (test_quiz_game.QuizGameTests.test_repeated_hint_deducts_once)
 같은 문제의 대소문자 h 재요청은 최초 한 번만 차감한다. ... ok
+test_restart_announces_loaded_quiz_count_and_best_score (test_quiz_game.QuizGameTests.test_restart_announces_loaded_quiz_count_and_best_score)
+정상 파일을 불러오면 퀴즈 수와 최고 점수(또는 미플레이)를 안내한다. ... ok
 test_run_routes_every_menu_and_exits (test_quiz_game.QuizGameTests.test_run_routes_every_menu_and_exits)
 유효한 메뉴는 해당 메서드로 전달하고 종료 뒤 추가 입력을 하지 않는다. ... ok
 test_save_keyboard_interrupt_reports_uncertainty_and_retains_dirty (test_quiz_game.QuizGameTests.test_save_keyboard_interrupt_reports_uncertainty_and_retains_dirty)
@@ -124,6 +126,12 @@ test_score_distinguishes_unplayed_from_completed_zero (test_quiz_game.QuizGameTe
 완료 전 상태와 완료했지만 0점인 상태를 구분한다. ... ok
 test_score_lower_bound_with_wrong_hinted_answers (test_quiz_game.QuizGameTests.test_score_lower_bound_with_wrong_hinted_answers)
 오답과 힌트로 계산 결과가 음수여도 최종 저장 점수는 0이다. ... ok
+test_quiz_uses_choice_count (test_scoring.ChoiceCountTests.test_quiz_uses_choice_count)
+보기 수와 정답 범위가 CHOICE_COUNT를 따른다. ... ok
+test_mission_rule_examples (test_scoring.ScoringTests.test_mission_rule_examples)
+정답 +2점, 힌트 -1점 규칙의 대표 사례를 계산한다. ... ok
+test_score_never_below_zero (test_scoring.ScoringTests.test_score_never_below_zero)
+힌트를 정답보다 많이 써도 0점 아래로 내려가지 않는다. ... ok
 test_flush_and_fsync_happen_before_replace (test_state_io.StateFileTests.test_flush_and_fsync_happen_before_replace) ... ok
 test_fsync_and_serialization_failures_preserve_and_cleanup (test_state_io.StateFileTests.test_fsync_and_serialization_failures_preserve_and_cleanup) ... ok
 test_full_roundtrip_utf8_pretty_json_and_newline (test_state_io.StateFileTests.test_full_roundtrip_utf8_pretty_json_and_newline) ... ok
@@ -149,6 +157,6 @@ test_quiz_validation_and_mutated_class_fields (test_state_io.StateValidationTest
 test_schema_integer_types_and_ranges (test_state_io.StateValidationTests.test_schema_integer_types_and_ranges) ... ok
 
 ----------------------------------------------------------------------
-Ran 86 tests in 0.216s
+Ran 90 tests in 0.265s
 
 OK
