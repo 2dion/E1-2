@@ -215,7 +215,7 @@ E1-2/
 ├── tools/capture_evidence.py  # 임시 복사본에서 실제 CLI 증거 생성
 ├── docs/requirements.md       # 미션 조건별 구현·검증 대응
 ├── docs/evidence/             # 실제 실행·테스트·Git 로그
-├── docs/screenshots/          # 실제 로그를 표시한 화면 캡처
+├── docs/screenshots/          # macOS 실제 화면 캡처와 실행 로그 표시 캡처
 ├── README.md
 └── 미션 사전 질문과 답변.md
 ```
@@ -340,9 +340,12 @@ python3 tools/capture_evidence.py
 
 ### 캡처의 성격
 
-`docs/screenshots/`는 **실제 실행 출력 로그를 UTF-8로 브라우저에 표시해 캡처한 이미지**다. 가상의 게임 출력이나 네이티브 터미널·에디터 캡처로 꾸민 이미지가 아니다. 입력 순서는 로그 상단에 따로 기록했다.
+`docs/screenshots/`의 이미지는 두 종류다.
 
-증거 재현에서만 원본 퀴즈의 정답 선택지를 2번 위치로 옮긴 **임시 테스트 데이터**를 사용해, 랜덤 순서와 무관하게 3개 정답·힌트 1회·5점을 검증한다. 원래 기본 문제의 내용·정답 의미와 프로젝트 `state.json`은 바꾸지 않는다. 로그 재생성 명령은 PNG를 자동 재촬영하지 않는다.
+- **macOS 실제 화면 캡처 (2026-11-16)**: environment·menu·add-quiz·list·play·score·restart·invalid-input·git-history. macOS Terminal 창(Python 3.14.4)에서 직접 입력하며 실행한 화면을 그 창 영역만 `screencapture`로 찍었다. 게임 화면은 임시 복사본 폴더에서 실행해 프로젝트 `state.json`은 변경하지 않았다. environment.png는 이 프로젝트를 연 VSCode 창과, 같은 저장소에서 버전·Git 설정을 확인한 Terminal 창을 각각 실제로 캡처해 한 이미지에 나란히 붙인 것이다(macOS 스테이지 매니저 때문에 두 창을 한 화면에 함께 배치하지 못함). git-history.png는 실제 저장소에서 `git log --oneline --graph --all`을 실행한 화면이다.
+- **실제 실행 로그의 브라우저 표시 캡처**: history·delete·eof·ctrl-c·corrupt-recovery. `tools/capture_evidence.py`가 기록한 실제 출력 로그를 UTF-8로 브라우저에 표시해 찍었다. 입력 순서는 로그 상단에 따로 기록했다.
+
+증거 재현에서만 원본 퀴즈의 정답 선택지를 2번 위치로 옮긴 **임시 테스트 데이터**를 사용해, 랜덤 순서와 무관하게 3개 정답·힌트 1회·5점을 검증한다. 원래 기본 문제의 내용·정답 의미와 프로젝트 `state.json`은 바꾸지 않는다. 로그 재생성 명령은 PNG를 자동 재촬영하지 않는다. macOS 실제 화면 캡처의 플레이는 이 재배치 없이 기본 문제 그대로 진행했다(3문제 중 2개 정답, 힌트 1회, 3점, 오답 안내 포함).
 
 - [환경](docs/screenshots/environment.png) · [메뉴](docs/screenshots/menu.png)
 - [추가](docs/screenshots/add-quiz.png) · [목록](docs/screenshots/list.png)
@@ -401,7 +404,7 @@ git log --oneline --graph --all
 - [x] 원격 clone → 변경·commit·push → 원본 pull 실습과 실제 증거
 - [ ] 학습자가 직접 실행하고 과제 목표를 스스로 설명할 수 있는지 확인
 
-평가자가 네이티브 터미널·에디터 자체의 스크린샷을 요구하면 본인 터미널에서 실행 화면을 별도로 촬영한다. 현재 이미지는 실제 출력 기록의 브라우저 캡처라는 점을 명확히 밝힌다.
+환경·메뉴·추가·목록·플레이·점수·재시작·입력 오류·Git 그래프 이미지는 macOS Terminal/VSCode 실제 화면 캡처(2026-11-16)이고, 히스토리·삭제·EOF·Ctrl+C·손상 복구 이미지는 실제 실행 로그를 브라우저에 표시해 찍은 캡처다.
 
 ## 복제·동기화 실습 확인
 
