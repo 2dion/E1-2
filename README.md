@@ -29,7 +29,7 @@
 git clone https://github.com/2dion/E1-2.git
 cd E1-2
 python3 --version                           # 3.10 이상
-python3 -m unittest discover -s tests -v    # 89개 테스트, 프로젝트 state.json을 바꾸지 않음
+python3 -m unittest discover -s tests -v    # 90개 테스트, 프로젝트 state.json을 바꾸지 않음
 python3 tools/capture_evidence.py           # 임시 복사본에서 실제 CLI 시나리오 12개 재현
 python3 main.py                             # 직접 플레이
 git log --oneline --graph --all             # 커밋·브랜치·병합 기록
@@ -42,7 +42,7 @@ git log --oneline --graph --all             # 커밋·브랜치·병합 기록
 | 메뉴 표시, 풀기·추가·목록·점수 확인 동작 | `QuizGame.run()`이 메뉴 번호마다 메서드 하나(`play`, `add_quiz`, `list_quizzes`, `show_score`)를 호출. 보너스로 삭제·히스토리 메뉴 추가 | [menu](docs/evidence/menu.txt) · [play](docs/evidence/play.txt) · [add-quiz](docs/evidence/add-quiz.txt) · [list](docs/evidence/list.txt) · [score](docs/evidence/score.txt) |
 | 정답/오답 판정 | 게임은 비교하지 않고 `quiz.is_correct(selected)`로 Quiz에게 요청. 오답이면 정답 번호를 알려 줌 | [play](docs/evidence/play.txt), `tests/test_quiz.py` |
 | 입력 오류 4가지: 공백, 문자, 범위 밖, 빈 입력 | `input_utils.read_int()`가 ① `strip()`으로 공백 제거 → ② 빈 값 안내 → ③ `int()` 실패(ValueError) 안내 → ④ 범위 검사 순서로 처리하고 다시 입력받음. 정답 입력(`ask_answer`)도 같은 순서 | [invalid-input](docs/evidence/invalid-input.txt) (입력 `\n`, `abc`, `9`, ` 0 `), `tests/test_input_utils.py` |
-| 재실행 후 추가 퀴즈·최고 점수 유지 | 추가·점수 갱신 직후 `state.json`에 UTF-8로 저장하고, 시작할 때 `load_state()`로 복원 | [restart](docs/evidence/restart.txt): 별도 프로세스에서 퀴즈 9개, 최고 5점 확인 |
+| 재실행 후 추가 퀴즈·최고 점수 유지 | 추가·점수 갱신 직후 `state.json`에 UTF-8로 저장하고, 시작할 때 `load_state()`로 복원. 복원에 성공하면 첫 화면에 "저장된 데이터를 불러왔습니다. (퀴즈 N개, 최고 점수 M점)"을 출력 | [restart](docs/evidence/restart.txt): 별도 프로세스에서 퀴즈 9개, 최고 5점 확인 |
 | 기본 퀴즈 5개 이상 | `defaults.py`에 Python·개발 기초 문제 8개, 각각 선택지 4개·정답·힌트 | `defaults.py`, `state.json` |
 | GitHub 업로드, 의미 있는 커밋 10개 이상 | 기능 단위 커밋 16개(이 보강 이전 기준, 빈 커밋 없음). 2026-11-16 실습 스크립트가 `main`과 `feature/quiz-play`를 모두 원격에 push했고, 실습 후 원격 `main`이 로컬과 같은 `4b00698`임을 `git ls-remote`로 확인 | [git-history](docs/evidence/git-history.txt), GitHub 커밋 목록 |
 | 브랜치 생성·병합이 `git log --oneline --graph`에 보임 | `feature/quiz-play`에서 퀴즈 풀기를 구현하고 `--no-ff`로 병합해 병합 커밋 `22018aa`를 남김 | [git-history](docs/evidence/git-history.txt), [그래프 캡처](docs/screenshots/git-history.png) |
@@ -211,7 +211,7 @@ E1-2/
 ├── scoring.py                 # 점수 규칙(정답 +2, 힌트 -1)과 계산 함수
 ├── state_io.py                # JSON 검증·읽기·원자적 저장
 ├── state.json                 # 제출 초기값 및 실행 중 저장 데이터
-├── tests/                     # 89개 unittest 테스트
+├── tests/                     # 90개 unittest 테스트
 ├── tools/capture_evidence.py  # 임시 복사본에서 실제 CLI 증거 생성
 ├── docs/requirements.md       # 미션 조건별 구현·검증 대응
 ├── docs/evidence/             # 실제 실행·테스트·Git 로그
@@ -330,10 +330,10 @@ python3 tools/capture_evidence.py
 
 ### 검증 결과
 
-- **89개 unittest 통과.** 모델 16개, 저장·검증 23개, 입력 7개, 게임 31개, 실행·문법 9개, 점수 규칙·선택지 수 3개. [보강 후 테스트 출력](docs/evidence/tests-after-refactor.txt) · [최초 Mac 테스트 출력(86개)](docs/evidence/tests.txt)
+- **90개 unittest 통과.** 모델 16개, 저장·검증 23개, 입력 7개, 게임 32개, 실행·문법 9개, 점수 규칙·선택지 수 3개. [Mac 테스트 출력](docs/evidence/tests.txt) · [Python 3.10 테스트 출력](docs/evidence/tests-python310.txt)
 - 점수 규칙과 선택지 수를 상수로 모은 뒤 `capture_evidence.py`로 12개 시나리오를 다시 돌려, 화면 출력이 캡처 시각과 랜덤 출제 순서 외에는 기존 로그와 같음을 확인했다.
 - **12개 실제 CLI 시나리오 통과.** 메뉴·추가·목록·랜덤/힌트·점수·히스토리·재시작·삭제·입력 오류·EOF·실제 SIGINT·손상 복구.
-- 실행 환경: **Python 3.13.12**, Git 2.54.0. 모든 소스는 Python 3.10 문법 AST 검사 통과. **Python 3.10 실행기에서 전체 실행 시험을 한 것은 아니다.**
+- 실행 환경: **Python 3.13.12**, Git 2.54.0 (Mac). 미션 최소 버전인 **Python 3.10.20에서도 90개 테스트 전체가 통과**했다(2026-11-16, 클라우드 Linux 작업 환경). 모든 소스는 Python 3.10 문법 AST 검사도 통과한다.
 - 추가된 퀴즈 9개와 최고 5점을 다른 프로세스에서 다시 불러오는 것을 확인했다. 손상 파일의 백업과 기본 8개 복구도 확인했다.
 - 오류 테스트는 임시 폴더와 mock을 사용한다. 쓰기 실패는 실제 시스템 권한을 망가뜨리지 않고 PermissionError/OSError를 주입해 검증했다.
 - 실제 Ctrl+C 검증은 신호를 받기 전 메뉴 프롬프트를 확인하고 SIGINT를 전송했다. 유닛 테스트의 모의 예외와 구별한다.
@@ -370,6 +370,8 @@ git checkout main
 git merge --no-ff feature/quiz-play -m "Merge: 별도 브랜치의 퀴즈 플레이 기능 병합"
 git log --oneline --graph --all
 ```
+
+**첫 커밋에 대해:** 첫 커밋 `4f0d26a Initial commit`은 GitHub에서 저장소를 만들 때 생성되어 `.gitignore`·`.gitattributes`만 담고 있다. 이를 로컬로 받은 뒤 `README.md`(사전 질문·개발 계획)를 추가한 `3460531`이 로컬에서 만든 첫 커밋이고, 이후 커밋과 함께 push했다.
 
 위는 실제 수행한 흐름의 요약이다. 기능별 커밋은 메뉴, Quiz, 기본 데이터, 플레이, 추가, 목록, 점수, 보너스, 파일 저장, 안전 종료 등으로 나누었다. 빈 커밋으로 개수를 채우지 않았다. [실제 Git 로그](docs/evidence/git-history.txt)
 
